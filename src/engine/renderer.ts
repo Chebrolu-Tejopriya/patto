@@ -405,7 +405,11 @@ export class Renderer {
       this.soft.i('u_pass', 1);
       this.soft.v2('u_dir', 0, 1 / h);
       this.draw();
-      // rotate the spare target into the ping-pong chain
+      // rotate the spare target into the ping-pong chain. The fields must stay three distinct
+      // targets: the old src becomes the spare and the spare takes the old src's slot, otherwise
+      // the next frame reads and writes the same texture and the pass collapses to the photo.
+      if (src === this.rtA) this.rtA = spare;
+      else this.rtB = spare;
       this.rtC = src;
       src = spare;
     } else if (pt.type !== 'none' && this.tech(pt.type)) {
