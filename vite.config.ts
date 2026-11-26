@@ -8,11 +8,13 @@ import type { Plugin } from 'vite'
 
 // Dev-only: the review page POSTs feedback here and it lands in the repo as JSON.
 function reviewFeedback(): Plugin {
-  const file = resolve(__dirname, 'public/review/feedback.json')
   return {
     name: 'review-feedback',
     configureServer(server) {
       server.middlewares.use('/__review/feedback', (req, res) => {
+        const q = new URL(req.url ?? '', 'http://x').searchParams.get('file') ?? 'feedback'
+        const name = /^[a-z0-9-]{1,40}$/i.test(q) ? q : 'feedback'
+        const file = resolve(__dirname, `public/review/${name}.json`)
         if (req.method === 'GET') {
           res.setHeader('Content-Type', 'application/json')
           try { res.end(readFileSync(file, 'utf8')) } catch { res.end('{}') }
@@ -44,7 +46,7 @@ export default defineConfig({
   plugins: [react(), reviewFeedback()],
   build: {
     rollupOptions: {
-      input: { main: resolve(__dirname, 'index.html'), review: resolve(__dirname, 'review.html') },
+      input: { main: resolve(__dirname, 'index.html'), review: resolve(__dirname, 'review.html'), test: resolve(__dirname, 'test.html') },
     },
   },
 })

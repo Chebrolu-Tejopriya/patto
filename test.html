@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patto · Image test</title>
+    <style>
+      :root { --bg: #0f0f12; --panel: #17171b; --text: #e8e8ec; --muted: #9a9aa6; --accent: #ff6b4a; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text); font: 13px/1.45 system-ui, sans-serif; }
+      header { padding: 20px 24px 8px; display: grid; grid-template-columns: 220px 1fr; gap: 20px; align-items: start; }
+      header img { width: 220px; border-radius: 8px; display: block; }
+      h1 { font-size: 18px; margin: 0 0 6px; }
+      header p { color: var(--muted); margin: 0 0 8px; max-width: 900px; }
+      .filters { display: flex; gap: 6px; padding: 10px 24px 0; flex-wrap: wrap; }
+      .filters button { border: 1px solid #2a2a30; background: var(--panel); color: var(--muted); padding: 5px 10px; border-radius: 999px; cursor: pointer; font: inherit; }
+      .filters button.on { color: var(--text); border-color: var(--accent); }
+      .summary { padding: 8px 24px 0; color: var(--muted); font-size: 12px; }
+      .grid { padding: 16px 24px 60px; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
+      .card { background: var(--panel); border-radius: 10px; padding: 10px; display: grid; gap: 8px; }
+      .card.hidden { display: none; }
+      .fig { position: relative; background: #000; border-radius: 6px; overflow: hidden; }
+      .fig canvas { display: block; width: 100%; height: auto; }
+      .fig .tag { position: absolute; left: 8px; top: 8px; font-size: 11px; background: rgba(0,0,0,.65); padding: 2px 7px; border-radius: 999px; color: #fff; }
+      .card b { font-size: 14px; }
+      .card small { color: var(--muted); }
+      .verdict { display: flex; gap: 6px; }
+      .verdict button { flex: 1; border: 1px solid #2a2a30; background: #1e1e24; color: var(--muted); padding: 6px 8px; border-radius: 6px; cursor: pointer; font: inherit; font-size: 12px; }
+      .verdict button.on.good { border-color: #2e7d4f; color: #9be0b0; background: #15281c; }
+      .verdict button.on.meh { border-color: #8a6a1f; color: #ffd38a; background: #2a2114; }
+      .verdict button.on.bad { border-color: #7d2e2e; color: #ff9aa5; background: #2a1517; }
+      textarea { width: 100%; min-height: 56px; resize: vertical; background: #0f0f12; color: var(--text); border: 1px solid #2a2a30; border-radius: 6px; padding: 7px 8px; font: inherit; }
+      textarea:focus { outline: none; border-color: var(--accent); }
+      .saved { color: var(--muted); font-size: 11px; text-align: right; min-height: 14px; }
+      .card.bad .fig { opacity: .5; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <img id="src" alt="" />
+      <div>
+        <h1>Patto image test: one photo, every preset</h1>
+        <p>The photo on the left pushed through every built-in preset by the app's engine, exactly as the stage would render it at 1080p. Mark each card as works, so-so, or wrong and add a note. Everything you type is written to <code>public/review/test-feedback.json</code>.</p>
+        <div class="filters" id="filters" style="padding: 0"></div>
+        <p class="summary" id="summary" style="padding: 8px 0 0"></p>
+      </div>
+    </header>
+    <div class="grid" id="grid"></div>
+    <script type="module" src="/src/review/test.ts"></script>
+  </body>
+</html>
