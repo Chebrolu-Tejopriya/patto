@@ -317,6 +317,8 @@ uniform vec3 u_paper;       // sky / background
 uniform float u_invert;
 uniform float u_slab;       // 1 = extrude the subject as layered slabs (pins 15, 29, 32, 36)
 uniform float u_keep;       // 1 = top faces in the image's own colour
+uniform float u_gap;        // slab: outline strength (0 = none)
+uniform vec3 u_mid;         // slab: face colour when the image colour is not kept
 
 float hash(vec2 p){
   vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -394,6 +396,7 @@ void main(){
         float lv = max(u_depth, 1.0) + 1.0;
         float Lq = (floor(clamp(L, 0.0, 0.999) * lv) + 0.5) / lv;
         base = clamp(base * (Lq / max(L, 1e-3)), 0.0, 1.0);
+        if(u_keep < 0.5) base = u_mid;                                   // one flat tint, like the lilac boxes
         base *= 0.9 + 0.14 * hash(floor(q * 3.0) + 0.7) * u_shade;
       }
       float top = step(h - k, STEP * 1.01);
@@ -410,6 +413,25 @@ void main(){
       col = mix(side, topCol, top);
       // floor level (h == 0) reads as flat ground: keep it slightly darker
       if(h < 0.5) col = mix(base, u_ink, 0.1 * sh);
+      if(u_slab > 0.5 && u_gap > 0.0){
+        // outlines: a dark line on every visible edge of a slab (pin 67 look)
+        float lw = 0.04 + u_gap * 0.08;
+        vec2 e2 = min(f, 1.0 - f);
+        float edge = 0.0;
+        if(top > 0.5){
+          // top face: edges toward neighbours of a different height
+          if(heightAt(cell + vec2(1.0, 0.0), cells) != h && 1.0 - f.x < lw) edge = 1.0;
+          if(heightAt(cell - vec2(1.0, 0.0), cells) != h && f.x < lw) edge = 1.0;
+          if(heightAt(cell + vec2(0.0, 1.0), cells) != h && 1.0 - f.y < lw) edge = 1.0;
+          if(heightAt(cell - vec2(0.0, 1.0), cells) != h && f.y < lw) edge = 1.0;
+        } else {
+          // side faces: vertical edges at the cell corners, horizontal edge where the side meets the top
+          float across = sideX > 0.5 ? e2.y : e2.x;
+          if(across < lw) edge = 1.0;
+          if(h - k < STEP * 2.0 + lw * 2.0) edge = 1.0;
+        }
+        col = mix(col, u_ink, edge * min(1.0, u_gap * 1.6));
+      }
       hit = true;
       break;
     }

@@ -8,8 +8,12 @@ import { HEADER, MASK, TECH } from './techniques';
  * density gradients of the pieces; colours are the image's own hue at each level. */
 export const CELLS_FRAG = HEADER + TECH + MASK + `
 uniform int u_marks[8];
+uniform int u_ground;
 uniform sampler2D u_trail;
-const int B4[16] = int[16](0,8,2,10, 12,4,14,6, 3,11,1,9, 15,7,13,5);
+// 8x8 Bayer: finer density steps between levels than the 4x4 (pins 9, 53)
+const int B8[64] = int[64](
+  0,32,8,40,2,34,10,42, 48,16,56,24,50,18,58,26, 12,44,4,36,14,46,6,38, 60,28,52,20,62,30,54,22,
+  3,35,11,43,1,33,9,41, 51,19,59,27,49,17,57,25, 15,47,7,39,13,45,5,37, 63,31,55,23,61,29,53,21);
 vec3 colourOf(vec3 c, float lum, float lvl, float n){
   float Lq = (lvl + 0.5) / n;
   if(u_keep > 0.5) return clamp(c * (Lq / max(lum, 1e-3)), 0.0, 1.0);
@@ -17,10 +21,23 @@ vec3 colourOf(vec3 c, float lum, float lvl, float n){
   return t < 0.5 ? mix(u_ink, u_mid, t * 2.0) : mix(u_mid, u_paper, t * 2.0 - 1.0);
 }
 // signed coverage of a mark inside the cell, f in 0..1, size s in cell units
-float markCov(int kind, vec2 f, float s, float aa){
+float markCov(int kind, vec2 f, float s, float aa, vec2 cell){
   vec2 d = f - 0.5;
   float r = s * 0.5;
   if(kind == 0) return 0.0;
+  if(kind == 9 || kind == 10){                                                                       // halftone screen inside the cell (pins 56, 62)
+    float n = kind == 9 ? 4.0 : 2.0;
+    vec2 sf = fract(f * n) - 0.5;
+    float rr = 0.18 + s * 0.22;
+    return 1.0 - smoothstep(rr - aa * n, rr + aa * n, length(sf));
+  }
+  if(kind == 11){ float w = r * 0.16; return max(step(abs(d.x - d.y) * 0.7071, w) * step(max(abs(d.x), abs(d.y)), r), step(abs(d.x + d.y) * 0.7071, w) * step(max(abs(d.x), abs(d.y)), r)); } // x cross (pin 59 ground)
+  if(kind == 12){ vec2 e = min(f, 1.0 - f); return step(min(e.x, e.y), 0.04 + s * 0.06); }        // grid lines on the cell edges (pin 59 figure)
+  if(kind == 13){                                                                                    // stipple: a small dot at a random spot (pin 69)
+    vec2 o = (vec2(hash(cell + 5.1), hash(cell + 9.7)) - 0.5) * 0.6;
+    float rr = r * 0.42 * (0.75 + 0.5 * hash(cell + 2.3));
+    return 1.0 - smoothstep(rr - aa, rr + aa, length(d - o));
+  }
   if(kind == 1){ return 1.0 - smoothstep(r * 0.35 - aa, r * 0.35 + aa, length(d)); }               // small dot
   if(kind == 2){ float w = r * 0.22; float a = step(abs(d.x), w) * step(abs(d.y), r); float b = step(abs(d.y), w) * step(abs(d.x), r); return max(a, b); } // plus
   if(kind == 3){ float l = length(d); return (1.0 - smoothstep(r - aa, r + aa, l)) * smoothstep(r * 0.62 - aa, r * 0.62 + aa, l); } // ring
@@ -44,7 +61,7 @@ void main(){
   float lo = floor(lf);
   float fr = lf - lo;
   ivec2 ic = ivec2(cell);
-  float bay = (float(B4[(ic.y & 3) * 4 + (ic.x & 3)]) + 0.5) / 16.0;
+  float bay = (float(B8[(ic.y & 7) * 8 + (ic.x & 7)]) + 0.5) / 64.0;
   float lvl = (fr * u_dither > bay * u_dither && u_dither > 0.01) ? lo + 1.0 : lo;
   lvl = min(lvl, n - 1.0);
   // trail (hover) lifts the level so marks bloom under the pointer and fade back
@@ -57,11 +74,19 @@ void main(){
   if(u_bgMode > 0.5 && u_keep > 0.5 && lvl < 0.5) base = u_paper;
   vec3 mk = colourOf(c, lum, lvl, n);
   if(u_keep < 0.5 && lvl < 0.5) mk = base;
-  float size = 0.35 + u_gap * 0.6;
-  float cov = markCov(kind, f, size, 0.8 / px);
+  if(kind == 12 && u_keep < 0.5) mk = vec3(1.0);                 // the grid mark is always white ink
+  float size = 0.35 + u_gap * 0.65;
+  float cov = markCov(kind, f, size, 0.8 / px, cell);
   float pulse = 1.0 + u_breathe * 0.08 * sin(u_phase * TAU + hash(cell) * TAU);
   vec3 col = mix(base, mk * pulse, cov);
-  outColor = finish(col, vUv);
+  // background: plain, or tiled with the ground mark in a darker tint of itself
+  float m = subjectMask(vUv);
+  vec3 bg = u_bgMode > 0.5 ? u_paper : texture(u_image, vUv).rgb;
+  if(u_ground > 0){
+    float gc = markCov(u_ground, f, size, 0.8 / px, cell);
+    bg = mix(bg, bg * 0.76, gc);
+  }
+  outColor = vec4(mix(bg, col, m), 1.0);
 }
 `;
 

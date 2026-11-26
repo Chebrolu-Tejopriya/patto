@@ -82,7 +82,8 @@ export type Pattern = {
   tolerance: number; // 0 = auto; otherwise colour distance that counts as subject
   thin: number; // px at 1080: features thinner than this keep the original
   bgMode: BgMode; // what the background becomes
-  marks: string; // cells: mark per tone level, comma list of none|dot|plus|ring|disc|square|xsquare|half|fill
+  marks: string; // cells: mark per tone level, comma list of none|dot|plus|ring|disc|square|xsquare|half|fill|dotscreen|screen|x|grid|stipple
+  ground: string; // cells: mark repeated over the background (pins 59, 64), none = plain
 };
 
 export type LookKind = 'pattern' | 'ombre';
@@ -145,7 +146,7 @@ export function defaultLook(): Look {
     photo: { fit: 'cover', blend: 0.85, posterize: 0, exposure: 0, contrast: 1.1, haze: 0.35, hazeHeight: 0.5, vignette: 0.25 },
     orb: { on: false, x: 0.5, y: 0.62, radius: 0.18, softness: 0.01, colorPos: 0.9, glow: 0.4 },
     interact: { on: true, mode: 'warp', strength: 0.4, radius: 0.55, follow: 0.4, fadeIdle: false },
-    pattern: { type: 'none', pixel: 6, threshold: 0.5, dither: 0.9, mode: 'bayer4', ink: '#1e2235', paper: '#e9ecdf', midtone: false, mid: '#8a8f9c', scroll: 0, invert: false, depth: 4, tilt: 35, breathe: 0.2, shade: 0.5, angle: 0, gap: 0.3, keep: false, shape: 'dot', subject: true, tolerance: 0, thin: 0, bgMode: 'keep', marks: 'none,dot,ring,disc,square,xsquare' },
+    pattern: { type: 'none', pixel: 6, threshold: 0.5, dither: 0.9, mode: 'bayer4', ink: '#1e2235', paper: '#e9ecdf', midtone: false, mid: '#8a8f9c', scroll: 0, invert: false, depth: 4, tilt: 35, breathe: 0.2, shade: 0.5, angle: 0, gap: 0.3, keep: false, shape: 'dot', subject: true, tolerance: 0, thin: 0, bgMode: 'keep', marks: 'none,dot,ring,disc,square,xsquare', ground: 'none' },
     effects: {
       waves: { on: true, amplitude: 0.04, frequency: 3, falloff: 0.5, cycles: 1 },
       grain: { on: true, amount: 0.12, size: 1.5 },

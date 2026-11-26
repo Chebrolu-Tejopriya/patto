@@ -32,7 +32,8 @@ const TECH_ORDER: PatternType[] = ['none', 'tiles', 'cells', 'stitch', 'hatch', 
 
 // per-technique mode switch, stored in `shape`
 const TECH_MODES: Partial<Record<PatternType, [Shape, string][]>> = {
-  hatch: [['dot', 'tone'], ['square', 'dash']],
+  hatch: [['dot', 'tone'], ['square', 'dash'], ['diamond', 'line art']],
+  riso: [['dot', 'plates'], ['square', 'line raster']],
   soft: [['dot', 'blur'], ['square', 'glass']],
   ascii: [['dot', 'glyphs'], ['square', 'words']],
   voxel: [['dot', 'height'], ['square', 'slab']],
@@ -97,7 +98,7 @@ const TECH_SLIDERS: Record<PatternType, SliderDef[]> = {
   riso: [S.threshold('Tone'), S.dither('Softness', 1), S.gap('Misregister'), S.shade('Ink density'), S.levels(), S.breathe('Wobble')],
   papercut: [S.layers(), S.angle('Light'), S.gap('Shadow'), S.shade('Depth'), S.threshold('Tone'), S.breathe('Pulse')],
   print: [S.pixel('Screen', 3, 30), S.angle(), S.threshold('Tone'), S.dither('Dot gain', 1), S.shade('Black plate'), S.gap('Misregister'), S.breathe('Pulse')],
-  voxel: [S.pixel('Block', 6, 48), S.threshold('Cutoff', 0, 0.95), S.depth(), S.tilt(), S.shade(), S.breathe()],
+  voxel: [S.pixel('Block', 6, 48), S.threshold('Cutoff', 0, 0.95), S.depth(), S.tilt(), S.shade(), S.gap('Outline'), S.breathe()],
   mosaic: [S.pixel('Tile', 6, 48), S.threshold('Cutoff', 0, 0.95), S.gap('Scatter'), S.depth('Reach'), S.shade('Bevel'), S.breathe('Drift')],
   glitch: [S.pixel('Grain', 2, 24), S.threshold('Amount'), S.dither('Slip'), S.shade('Chroma'), S.gap('Scanlines'), S.breathe('Wobble')],
   soft: [S.pixel('Blur', 2, 120), S.shade('Mix'), S.gap('Wash / halo'), { key: 'depth', label: 'Bloom / tile', min: 1, max: 8, step: 1 }, S.dither('Bands', 1), S.breathe('Pulse')],
@@ -272,7 +273,14 @@ export function Inspector() {
               <label className="marks">
                 <span>Marks per level</span>
                 <input value={pt.marks} onChange={(ev) => update((l) => (l.pattern.marks = ev.target.value))} spellCheck={false} />
-                <small>none, dot, plus, ring, disc, square, xsquare, half, fill</small>
+                <small>none, dot, plus, ring, disc, square, xsquare, half, fill, dotscreen, screen, x, grid, stipple</small>
+              </label>
+            )}
+            {pt.type === 'cells' && (
+              <label className="marks">
+                <span>Ground mark</span>
+                <input value={pt.ground ?? 'none'} onChange={(ev) => update((l) => (l.pattern.ground = ev.target.value))} spellCheck={false} />
+                <small>one mark tiled over the background, or none</small>
               </label>
             )}
             <div className="inks">

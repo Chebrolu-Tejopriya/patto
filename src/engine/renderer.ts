@@ -21,7 +21,7 @@ const TECH_SRC: Partial<Record<PatternType, string>> = {
   glyph: GLYPH_FRAG,
 };
 
-const MARK_IDS: Record<string, number> = { none: 0, dot: 1, plus: 2, ring: 3, disc: 4, square: 5, xsquare: 6, half: 7, fill: 8 };
+const MARK_IDS: Record<string, number> = { none: 0, dot: 1, plus: 2, ring: 3, disc: 4, square: 5, xsquare: 6, half: 7, fill: 8, dotscreen: 9, screen: 10, x: 11, grid: 12, stipple: 13 };
 function parseMarks(s: string) {
   const out = new Int32Array(8);
   const parts = s.split(',').map((p) => p.trim().toLowerCase());
@@ -263,6 +263,7 @@ export class Renderer {
     p.f('u_bgMode', pt.bgMode === 'paper' ? 1 : 0);
     const ml = p.loc('u_marks[0]') ?? p.loc('u_marks');
     if (ml) this.gl.uniform1iv(ml, parseMarks(pt.marks));
+    p.i('u_ground', MARK_IDS[(pt.ground ?? 'none').trim().toLowerCase()] ?? 0);
     p.tex('u_trail', 2, this.trailA.tex);
   }
 
@@ -409,6 +410,9 @@ export class Renderer {
       this.voxel.f('u_invert', pt.invert ? 1 : 0);
       this.voxel.f('u_slab', pt.shape === 'square' ? 1 : 0);
       this.voxel.f('u_keep', pt.keep ? 1 : 0);
+      this.voxel.f('u_gap', pt.gap);
+      const vmid = hexToRgb(pt.mid);
+      this.gl.uniform3f(this.voxel.loc('u_mid'), vmid[0], vmid[1], vmid[2]);
       this.voxel.f('u_thin', (pt.thin * h) / 1080);
       this.voxel.f('u_bgMode', pt.bgMode === 'paper' ? 1 : 0);
       this.draw();

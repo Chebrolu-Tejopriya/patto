@@ -297,6 +297,27 @@ void main(){
   float wmix = smoothstep(0.0, 1.0, fract(k));
   vec2 n0 = dirOf(i0), n1 = dirOf(i0 + 1.0);
 
+  if(u_shape == 2){
+    // line art (pin 57): one-pixel outlines where the tone changes, broken into dashes,
+    // and a sparse pixel dither only in the shadows. Everything else is bare paper.
+    float s1 = max(1.0, u_res.y / 1080.0);
+    vec2 t1 = tx * s1;
+    float gx = lumAt(vUv + vec2(t1.x, 0.0)) - lumAt(vUv - vec2(t1.x, 0.0));
+    float gy = lumAt(vUv + vec2(0.0, t1.y)) - lumAt(vUv - vec2(0.0, t1.y));
+    float e = length(vec2(gx, gy)) * (0.5 + u_dither);
+    float edge = step(0.12, e);
+    float dash = step(u_gap * 0.7, hash(floor(P / (px * 1.5)) + 0.4));
+    float darkL = clamp((1.0 - lumAt(vUv) - (u_threshold - 0.5)) * (0.6 + u_dither), 0.0, 1.0);
+    float g = max(2.0, px * 0.45);
+    vec2 gc = floor(P / g);
+    vec2 fg = fract(P / g);
+    float pip = step(fg.x, 0.5) * step(fg.y, 0.5) * step(hash(gc + 4.4), (darkL - 0.45) * 1.2);
+    float ink = max(edge * dash, pip);
+    vec3 cC = texture(u_image, vUv).rgb;
+    vec3 inkL = u_keep > 0.5 ? cC * 0.6 : u_ink;
+    outColor = finish(mix(u_paper, inkL, ink), vUv);
+    return;
+  }
   if(u_shape == 1){
     // linear dashes: one direction per region (nearest family, no blending), fixed dash
     // length and spacing, brick offset on alternate rows, constant width, no tone fill
@@ -307,6 +328,10 @@ void main(){
     float along = dot(P, tdir) / px + (mod(row, 2.0) < 1.0 ? 0.0 : 1.7) + u_phase * u_scroll * 3.4;
     float seg = fract(along / 3.4);
     float dash = step(seg, 0.72);
+    // tone density (u_shade): darker tone keeps more dashes, lighter tone drops them (pin 61)
+    float lumD = lumAt(vUv);
+    float darkD = clamp((1.0 - lumD - (u_threshold - 0.5)) * (0.6 + u_dither), 0.0, 1.0);
+    dash *= step(hash(vec2(row, floor(along / 3.4)) + 0.9), mix(1.0, darkD * 1.5, u_shade));
     float capA = smoothstep(0.0, 0.08, seg) * (1.0 - smoothstep(0.64, 0.72, seg));
     float w = 0.14 + u_gap * 0.1;
     float line = (1.0 - smoothstep(w - 0.8 / px, w + 0.8 / px, abs(fr))) * dash * max(capA, 0.6);
@@ -393,6 +418,20 @@ void main(){
     vec3 ink = vec3(r, g, b);
     if(u_invert > 0.5) ink = 1.0 - ink;
     col = paper * mix(vec3(1.0), ink, cov1 * dens);
+  } else if(u_shape == 1){
+    // line raster (pin 71): shadows solid in the ink, mids as a diagonal line screen in the
+    // second ink, one-pixel outline at the tone edges. Hard pixels, no softness.
+    float l1 = lumAt(vUv + d1 * tx);
+    float l2 = lumAt(vUv + d2 * tx);
+    float sp = max(3.0, 4.0 * s);
+    float diag = step(0.5, fract((P.x + P.y) / (sp * 1.4142)));
+    float solid = 1.0 - step(u_threshold, l1);
+    float mids = (1.0 - step(u_threshold + 0.3, l2)) * (1.0 - solid);
+    float gx = lumAt(vUv + vec2(tx.x * s, 0.0)) - lumAt(vUv - vec2(tx.x * s, 0.0));
+    float gy = lumAt(vUv + vec2(0.0, tx.y * s)) - lumAt(vUv - vec2(0.0, tx.y * s));
+    float edge = step(0.22, length(vec2(gx, gy)) * (0.6 + u_dither));
+    col = mix(col, col * u_mid, mids * diag * dens);
+    col = mix(col, col * u_ink, max(solid, edge) * dens);
   } else {
     float l1 = lumAt(vUv + d1 * tx);
     float l2 = lumAt(vUv + d2 * tx);
