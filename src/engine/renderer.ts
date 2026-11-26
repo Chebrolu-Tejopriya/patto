@@ -24,7 +24,22 @@ const TECH_SRC: Partial<Record<PatternType, string>> = {
 const MARK_IDS: Record<string, number> = { none: 0, dot: 1, plus: 2, ring: 3, disc: 4, square: 5, xsquare: 6, half: 7, fill: 8, dotscreen: 9, screen: 10, x: 11, grid: 12, stipple: 13 };
 /** Connected regions (4-neighbour) of a boolean grid; keeps the largest and any at least 30% of its
  * size, dilated by one cell. Returns 0/255 per cell. */
-function largestRegions(inside: boolean[], w: number, h: number): Uint8Array {
+function largestRegions(inside0: boolean[], w: number, h: number): Uint8Array {
+  // opening: erode twice so stems and leaf stalks (a few cells wide) detach, then the
+  // region test, then dilate back so the kept region's edges return to where they were
+  const erode = (src: boolean[]) => {
+    const out: boolean[] = new Array(w * h);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      let v = src[y * w + x];
+      for (let dy = -1; dy <= 1 && v; dy++) for (let dx = -1; dx <= 1 && v; dx++) {
+        const xx = x + dx, yy = y + dy;
+        if (xx < 0 || yy < 0 || xx >= w || yy >= h || !src[yy * w + xx]) v = false;
+      }
+      out[y * w + x] = v;
+    }
+    return out;
+  };
+  const inside = erode(erode(inside0));
   const label = new Int32Array(w * h).fill(-1);
   const sizes: number[] = [];
   const stack: number[] = [];
@@ -46,10 +61,12 @@ function largestRegions(inside: boolean[], w: number, h: number): Uint8Array {
   const keep = sizes.map((s) => s >= big * 0.3);
   const core = new Uint8Array(w * h);
   for (let i = 0; i < w * h; i++) core[i] = label[i] >= 0 && keep[label[i]] ? 255 : 0;
+  // dilate by 3 (the two erosions plus one cell of slack); the per-pixel colour test does the fine edge
   const out = new Uint8Array(w * h);
+  const R = 3;
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     let v = 0;
-    for (let dy = -1; dy <= 1 && !v; dy++) for (let dx = -1; dx <= 1 && !v; dx++) {
+    for (let dy = -R; dy <= R && !v; dy++) for (let dx = -R; dx <= R && !v; dx++) {
       const xx = x + dx, yy = y + dy;
       if (xx >= 0 && yy >= 0 && xx < w && yy < h && core[yy * w + xx]) v = 255;
     }
@@ -271,8 +288,19 @@ export class Renderer {
       this.tone = toneOf(this.bg.ok ? all.filter((p) => Math.hypot(p[0] - ma[0], p[1] - ma[1], p[2] - ma[2]) > tol) : all);
       // keep the main subject region only: stray stems and leaves that also differ from the
       // dominant colour would otherwise be patterned as islands
-      const inside = all.map((p) => Math.hypot(p[0] - ma[0], p[1] - ma[1], p[2] - ma[2]) > tol * 0.9);
-      this.uploadIsland(this.bg.ok ? largestRegions(inside, n, n) : null, n);
+      if (this.bg.ok) {
+        // finer grid for the region test so thin stems can be cut away from the subject
+        const m = 96;
+        c.width = m;
+        c.height = m;
+        ctx.drawImage(img, 0, 0, m, m);
+        const dd = ctx.getImageData(0, 0, m, m).data;
+        const inside: boolean[] = new Array(m * m);
+        for (let i = 0; i < m * m; i++) inside[i] = Math.hypot(dd[i * 4] / 255 - ma[0], dd[i * 4 + 1] / 255 - ma[1], dd[i * 4 + 2] / 255 - ma[2]) > tol * 0.9;
+        this.uploadIsland(largestRegions(inside, m, m), m);
+      } else {
+        this.uploadIsland(null, n);
+      }
     } catch {
       this.bg = { r: 1, g: 1, b: 1, tol: 0.15, ok: false, soft: false };
       this.tone = { lo: 0, hi: 1 };
