@@ -51,7 +51,7 @@ export type Orb = {
 
 /** A pattern technique applied to the image (photo or gradient). This is the
  * heart of the product: hand-picked rendering styles, not stock filters. */
-export type PatternType = 'none' | 'bitmap' | 'voxel' | 'halftone' | 'print' | 'stitch' | 'ascii' | 'hatch' | 'riso' | 'papercut' | 'glitch' | 'mosaic' | 'tiles' | 'soft' | 'cells' | 'split' | 'blocks' | 'glyph';
+export type PatternType = 'none' | 'bitmap' | 'voxel' | 'halftone' | 'print' | 'stitch' | 'matty' | 'pixelart' | 'ascii' | 'hatch' | 'riso' | 'papercut' | 'glitch' | 'mosaic' | 'tiles' | 'soft' | 'cells' | 'split' | 'blocks' | 'glyph';
 export type BgMode = 'keep' | 'paper';
 export type Shape = 'dot' | 'square' | 'diamond' | 'ring';
 export type DitherMode = 'bayer4' | 'bayer8' | 'lines' | 'noise';

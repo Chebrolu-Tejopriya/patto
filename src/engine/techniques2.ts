@@ -110,22 +110,22 @@ void main(){
 
   // aida: light weave with a dark seam grid and a square hole at each corner
   vec2 e = min(f, 1.0 - f);
-  float seam = smoothstep(0.06, 0.0, min(e.x, e.y));
-  float hole = step(max(e.x, e.y), 0.09);
+  float seam = 1.0 - smoothstep(0.0, 0.07, min(e.x, e.y));
+  float hole = 1.0 - smoothstep(0.045, 0.085, length(e));
   float weave = 0.5 + 0.5 * sin(P.x * 6.2832 / px * 2.0) * sin(P.y * 6.2832 / px * 2.0);
-  vec3 fabric = u_paper * (1.0 - 0.06 * seam - 0.18 * hole - 0.03 * weave) * (1.0 - 0.025 * hash(cell));
+  vec3 fabric = u_paper * (1.0 - 0.08 * seam - 0.30 * hole - 0.045 * weave) * (1.0 - 0.025 * hash(cell));
 
   // thread colour: lightness steps with the hue kept, or a two-ink palette
   float lv = floor(2.0 + u_dither * 4.0);
   float Lq = floor(lum * lv + 0.5) / lv;
-  vec3 q = clamp(c * (Lq / max(lum, 1e-3)), 0.0, 1.0);
-  vec3 thread = u_keep > 0.5 ? q : mix(u_ink, u_mid, step(u_threshold * 0.55, lum));
+  vec3 q = clamp(c * (mix(lum, Lq, 0.55) / max(luma(c), 1e-3)), 0.0, 1.0);
+  vec3 thread = u_keep > 0.5 ? q : mix(u_ink, u_mid, clamp(Lq / max(u_threshold, 1e-3), 0.0, 1.0));
   thread *= 1.0 - 0.05 * hash(cell + 1.1);
   if(u_iMode == 2) thread = mix(thread, u_paper, iFall(cuv) * u_iAmt * 0.3);
 
   float w = 0.11 + u_gap * 0.12;          // thread radius in cell units
-  float aa = 0.9 / px;
-  float inset = 0.12;
+  float aa = 0.55 / px;
+  float inset = 0.18;
   vec2 a1 = vec2(inset, inset), b1 = vec2(1.0 - inset, 1.0 - inset);     // bottom thread: /
   vec2 a2 = vec2(inset, 1.0 - inset), b2 = vec2(1.0 - inset, inset);     // top thread, the other diagonal
   vec2 L = normalize(vec2(-0.6, 0.8));                                   // light from top-left
@@ -145,7 +145,9 @@ void main(){
     float t1 = clamp(dot(f - a1, n1) / w, -1.0, 1.0);
     float crown1 = sqrt(max(0.0, 1.0 - t1 * t1));
     float lit1 = 0.72 + 0.38 * crown1 * (0.6 + 0.4 * dot(n1 * sign(t1), L));
-    lit1 += 0.18 * pow(crown1, 8.0) * u_shade;
+    float detail = smoothstep(6.0, 16.0, px);
+    float fibres1 = 0.5 + 0.5 * cos((dot(f, n1) * 13.0 + dot(f, normalize(b1-a1)) * 2.0) * TAU);
+    lit1 = mix(1.0, lit1 * (1.0 - 0.18 * detail * pow(fibres1, 4.0)), u_shade);
     col = mix(col, thread * lit1, m1);
     // top thread casts onto the bottom one
     float sT = capsule(f - shOff, a2, b2);
@@ -157,10 +159,13 @@ void main(){
     float t2 = clamp(dot(f - a2, n2) / w, -1.0, 1.0);
     float crown2 = sqrt(max(0.0, 1.0 - t2 * t2));
     float lit2 = 0.74 + 0.38 * crown2 * (0.6 + 0.4 * dot(n2 * sign(t2), L));
-    lit2 += 0.2 * pow(crown2, 8.0) * u_shade;
+    float fibres2 = 0.5 + 0.5 * cos((dot(f, n2) * 13.0 + dot(f, normalize(b2-a2)) * 2.0) * TAU);
+    lit2 = mix(1.0, lit2 * (1.0 - 0.18 * detail * pow(fibres2, 4.0)), u_shade);
     col = mix(col, thread * lit2 * 1.03, m2);
   }
-  outColor = finish(col, vUv);
+  float mask = subjectMask(vUv);
+  vec3 bg = u_bgMode > 0.5 ? fabric : texture(u_image, vUv).rgb;
+  outColor = vec4(mix(bg, col, mask), 1.0);
 }
 `;
 
@@ -250,36 +255,50 @@ void main(){
 }
 `;
 
-/** Glyph field (pin 39): a five-petal flower glyph where the subject is dark, a dot
- * where it is light. The focus cursor blooms dots into flowers under the pointer. */
+/** Glyph field (pin 39): open-centred flowers sized by image tone, tapering into
+ * dots in the highlights. The focus cursor blooms the smaller marks. */
 export const GLYPH_FRAG = HEADER + TECH + MASK + `
 float flower(vec2 d, float r){
   float m = 1e9;
   for(int i = 0; i < 5; i++){
     float a = float(i) * 1.2566 + 0.3;
-    m = min(m, length(d - vec2(cos(a), sin(a)) * r * 0.55) - r * 0.42);
+    m = min(m, length(d - vec2(cos(a), sin(a)) * r * 0.58) - r * 0.36);
   }
-  return min(m, length(d) - r * 0.3);
+  return max(min(m, length(d) - r * 0.32), r * 0.14 - length(d));
 }
 void main(){
   float px = max(u_pixel, 6.0);
   vec2 P = vUv * u_res;
   vec2 cell = floor(P / px);
-  vec2 f = fract(P / px) - 0.5;
-  vec2 cuv = (cell + 0.5) * px / u_res;
+  // A little positional and rotational variation keeps the field from reading
+  // as a screen of identical stamps. Sample at the displaced mark's centre.
+  vec2 jitter = (vec2(hash(cell + 7.1), hash(cell + 19.7)) - 0.5) * 0.1;
+  vec2 f = rot(fract(P / px) - 0.5 - jitter, (hash(cell + 3.8) - 0.5) * 1.2);
+  vec2 cuv = (cell + 0.5 + jitter) * px / u_res;
   vec3 c = texture(u_image, cuv).rgb;
   float lum = luma(c);
   if(u_invert > 0.5) lum = 1.0 - lum;
   float dark = clamp((1.0 - lum - (u_threshold - 0.5)) * (0.6 + u_dither), 0.0, 1.0);
+  // Bright coloured petals still need marks; luminance alone turns them into
+  // blank paper. Neutral highlights retain the small-dot end of the scale.
+  float chroma = max(c.r, max(c.g, c.b)) - min(c.r, min(c.g, c.b));
+  float tone = max(max(dark, chroma * 0.55), 0.24 * subjectAt(cuv));
   float bloom = u_iMode == 3 ? smoothstep(0.1, 0.8, iFall(cuv) * u_iAmt) : 0.0;
-  float want = max(step(0.45, dark), bloom);
-  float r = (0.3 + u_gap * 0.25) * (0.8 + 0.2 * hash(cell));
-  float aa = 0.9 / px;
+  float want = max(smoothstep(0.10, 0.38, tone), bloom);
+  float size = mix(0.28, 1.0, pow(tone, 0.75));
+  float r = (0.28 + u_gap * 0.20) * mix(size, 1.0, bloom) * (0.78 + 0.22 * hash(cell));
+  float aa = 0.55 / px;
   float fl = 1.0 - smoothstep(-aa, aa, flower(f, r));
-  float dot_ = 1.0 - smoothstep(r * 0.16 - aa, r * 0.16 + aa, length(f));
-  float cov = mix(dot_ * step(0.08, dark + bloom), fl, want);
+  float dot_ = 1.0 - smoothstep(0.025 - aa, 0.025 + aa, length(f));
+  float cov = mix(dot_ * smoothstep(0.02, 0.12, tone + bloom), fl, want);
   vec3 paper = u_paper * (1.0 - 0.04 * hash(floor(P / max(1.0, u_res.y / 1080.0))));
   vec3 inkc = u_keep > 0.5 ? c : u_ink;
+  // Keep source colours legible on both light and dark paper.
+  if(u_keep > 0.5){
+    float paperLum = luma(u_paper), inkLum = luma(inkc);
+    if(paperLum > 0.5) inkc *= min(1.0, (paperLum - 0.18) / max(inkLum, 0.001));
+    else inkc = mix(inkc, vec3(1.0), max(0.0, (paperLum + 0.18 - inkLum) / max(1.0 - inkLum, 0.001)));
+  }
   // palette rotation per cell for the field look
   float hs = hash(cell + 2.2);
   if(u_keep < 0.5) inkc = hs < 0.33 ? u_ink : (hs < 0.66 ? u_mid : mix(u_ink, u_mid, 0.5));

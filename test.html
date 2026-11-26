@@ -16,12 +16,20 @@
       .filters button { border: 1px solid #2a2a30; background: var(--panel); color: var(--muted); padding: 5px 10px; border-radius: 999px; cursor: pointer; font: inherit; }
       .filters button.on { color: var(--text); border-color: var(--accent); }
       .summary { padding: 8px 24px 0; color: var(--muted); font-size: 12px; }
-      .grid { padding: 16px 24px 60px; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
-      .card { background: var(--panel); border-radius: 10px; padding: 10px; display: grid; gap: 8px; }
+      .grid { padding: 16px 24px 60px; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 620px), 1fr)); align-items: start; }
+      .card { min-width: 0; background: var(--panel); border-radius: 10px; padding: 12px; display: grid; gap: 10px; }
       .card.hidden { display: none; }
-      .fig { position: relative; background: #000; border-radius: 6px; overflow: hidden; }
-      .fig canvas { display: block; width: 100%; height: auto; }
-      .fig .tag { position: absolute; left: 8px; top: 8px; font-size: 11px; background: rgba(0,0,0,.65); padding: 2px 7px; border-radius: 999px; color: #fff; }
+      .comparison { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+      figure { margin: 0; min-width: 0; }
+      figcaption { min-height: 36px; color: var(--muted); font-size: 12px; padding-bottom: 6px; }
+      .fig { display: block; aspect-ratio: 1; background: #0b0b0e; border-radius: 6px; overflow: hidden; }
+      .fig canvas, .fig img { display: block; width: 100%; height: 100%; object-fit: contain; }
+      .reference-image { cursor: zoom-in; }
+      .reference-controls:empty { display: none; }
+      .reference-controls select { width: 100%; margin-top: 8px; padding: 6px; border: 1px solid #34343c; border-radius: 5px; background: var(--bg); color: var(--text); font: inherit; }
+      .source-link { display: inline-block; margin-top: 6px; color: var(--muted); font-size: 12px; }
+      .source-link:hover { color: var(--text); }
+      a:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
       .card b { font-size: 14px; }
       .card small { color: var(--muted); }
       .verdict { display: flex; gap: 6px; }
@@ -36,17 +44,23 @@
       .upload { display: block; margin-top: 8px; border: 1px dashed #34343c; border-radius: 8px; padding: 8px; text-align: center; color: var(--muted); cursor: pointer; font-size: 12px; position: relative; }
       .upload:hover { border-color: var(--accent); color: var(--text); }
       .upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+      @media (max-width: 640px) {
+        header { padding: 16px 12px 8px; grid-template-columns: 1fr; gap: 12px; }
+        header > div:first-child { max-width: 220px; }
+        .grid { padding: 12px 12px 40px; }
+        .comparison { gap: 8px; }
+      }
     </style>
   </head>
   <body>
     <header>
       <div>
-        <img id="src" alt="" />
+        <img id="src" alt="Uploaded test image" />
         <label class="upload"><input type="file" id="file" accept="image/*" />Try another image</label>
       </div>
       <div>
-        <h1>Patto image test: one photo, every preset</h1>
-        <p>The photo on the left pushed through every built-in preset by the app's engine, exactly as the stage would render it at 1080p. Mark each card as works, so-so, or wrong and add a note. Everything you type is written to <code>public/review/test-feedback.json</code>.</p>
+        <h1>Compare every preset with its reference</h1>
+        <p>Each card pairs the original reference with your image rendered through that preset. Click a reference to see it full size, or choose another where available. Derived variants are labelled with their shared style reference. Mark each result as works, so-so, or wrong and add a note. Feedback saves automatically.</p>
         <div class="filters" id="filters" style="padding: 0"></div>
         <p class="summary" id="summary" style="padding: 8px 0 0"></p>
       </div>

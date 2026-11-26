@@ -1,7 +1,8 @@
+import { useState } from 'react';
 import { MAX_STOPS, type BgMode, type DitherMode, type GradientType, type InteractMode, type Pattern, type PatternType, type Shape } from '../model/look';
 import { sizeForImage, useStore } from '../store';
 import { Section, Seg, Slider, Toggle } from './controls';
-import { ExportMenu } from './ExportMenu';
+import { COLOR_PALETTES, gradientPreview } from '../model/palettes';
 
 
 // ---- Pattern technique control tables -------------------------------------
@@ -28,10 +29,11 @@ const S = {
   scroll: (label = 'Scroll'): SliderDef => ({ key: 'scroll', label, min: 0, max: 16, step: 1, fmt: (v) => (v ? cells(v) : 'still') }),
 };
 
-const TECH_ORDER: PatternType[] = ['none', 'tiles', 'cells', 'stitch', 'hatch', 'voxel', 'split', 'blocks', 'glyph', 'soft', 'riso', 'papercut', 'print', 'halftone', 'bitmap', 'ascii', 'mosaic', 'glitch'];
+const TECH_ORDER: PatternType[] = ['none', 'tiles', 'cells', 'stitch', 'matty', 'pixelart', 'hatch', 'voxel', 'split', 'blocks', 'glyph', 'soft', 'riso', 'papercut', 'print', 'halftone', 'bitmap', 'ascii', 'mosaic', 'glitch'];
 
 // per-technique mode switch, stored in `shape`
 const TECH_MODES: Partial<Record<PatternType, [Shape, string][]>> = {
+  pixelart: [['dot', 'flat'], ['square', 'outlined']],
   hatch: [['dot', 'tone'], ['square', 'dash'], ['diamond', 'line art']],
   riso: [['dot', 'plates'], ['square', 'line raster']],
   soft: [['dot', 'blur'], ['square', 'glass']],
@@ -40,9 +42,13 @@ const TECH_MODES: Partial<Record<PatternType, [Shape, string][]>> = {
   split: [['dot', 'half pixel'], ['square', 'cut-out']],
 };
 const TECH_LABEL: Record<PatternType, string> = {
+  pixelart: 'Pixel art',
+  matty: 'Matty work',
   none: 'None', tiles: 'Mosaic', cells: 'Cells', split: 'Split', blocks: 'Blocks', glyph: 'Glyphs', bitmap: 'Bitmap', halftone: 'Halftone', print: 'Print', ascii: 'ASCII', stitch: 'Stitch', hatch: 'Engrave', riso: 'Riso', papercut: 'Paper cut', voxel: 'Voxel', mosaic: 'Shards', glitch: 'Glitch', soft: 'Airbrush',
 };
 const TECH_HINT: Record<PatternType, string> = {
+  pixelart: 'Solid pixels with an optional stepped outline. Keep image colours, or use the gradient stops as your palette.',
+  matty: 'Dense, raised yarn stitches inspired by matty-work embroidery. Stitch the whole image with a thread palette or keep its original colours.',
   none: '',
   cells: 'Tone levels each own a mark (dot, plus, ring, disc, square, half, fill) in the image colour; density gradients come from ordered dither between levels.',
   split: 'Half pixel: part of the subject becomes flat pixels along a straight edge. Cut-out: a blocky silhouette, photo inside, paper outside.',
@@ -63,6 +69,8 @@ const TECH_HINT: Record<PatternType, string> = {
   soft: 'Airbrushed blur on a flat wash, with bloom and soft tonal bands. Add grain for the poster look.',
 };
 const TECH_SWATCHES: Record<PatternType, [ColorKey, string][]> = {
+  pixelart: [['paper', 'Background']],
+  matty: [['ink', 'Dark thread'], ['mid', 'Mid thread'], ['paper', 'Light thread']],
   none: [],
   cells: [['ink', 'Dark'], ['mid', 'Mid'], ['paper', 'Light / base']],
   split: [['paper', 'Paper']],
@@ -82,8 +90,10 @@ const TECH_SWATCHES: Record<PatternType, [ColorKey, string][]> = {
   glitch: [['mid', 'Accent']],
   soft: [['paper', 'Wash']],
 };
-const TECH_KEEP = new Set<PatternType>(['halftone', 'print', 'ascii', 'stitch', 'hatch', 'riso', 'papercut', 'mosaic', 'cells', 'glyph', 'voxel']);
+const TECH_KEEP = new Set<PatternType>(['halftone', 'print', 'ascii', 'stitch', 'matty', 'pixelart', 'hatch', 'riso', 'papercut', 'mosaic', 'cells', 'glyph', 'voxel']);
 const TECH_SLIDERS: Record<PatternType, SliderDef[]> = {
+  pixelart: [S.pixel('Pixel size', 4, 64), S.threshold('Tone'), S.dither('Simplify', 1)],
+  matty: [S.pixel('Stitch', 6, 48), S.threshold('Tone'), S.dither('Palette', 1), S.gap('Thread fullness'), S.shade('Relief'), S.breathe('Shimmer')],
   none: [],
   cells: [S.pixel('Cell', 3, 40), { key: 'depth', label: 'Levels', min: 1, max: 7, step: 1, fmt: (v) => v + 1 + ' levels' }, S.threshold('Tone'), S.dither('Blend', 1), S.gap('Mark size'), S.shade('Dropout'), S.breathe('Pulse')],
   split: [S.pixel('Pixel', 4, 80), S.angle('Edge angle'), S.threshold('Edge'), S.dither('Palette', 1), S.breathe('Drift')],
@@ -116,10 +126,9 @@ const SIZES: Record<string, [number, number]> = {
 export function Inspector() {
   const look = useStore((s) => s.look);
   const update = useStore((s) => s.update);
-  const randomize = useStore((s) => s.randomize);
-  const playing = useStore((s) => s.playing);
-  const setPlaying = useStore((s) => s.setPlaying);
+  const [tab, setTab] = useState('style');
   const g = look.gradient;
+  const activePalette = COLOR_PALETTES.find(p => p.stops.length === g.stops.length && p.stops.every((s, i) => s.color === g.stops[i].color && s.pos === g.stops[i].pos));
   const e = look.effects;
   const ph = look.photo;
   const o = look.orb;
@@ -131,16 +140,13 @@ export function Inspector() {
   const sizeKey = matchesImage ? 'Match image' : (Object.keys(SIZES).find((k) => SIZES[k][0] === look.size.w && SIZES[k][1] === look.size.h) ?? 'custom');
 
   return (
-    <aside className="panel inspector">
-      <div className="topbar">
-        <button className="mini" onClick={() => setPlaying(!playing)} title="Space">
-          {playing ? '❚❚ Pause' : '▶ Play'}
-        </button>
-        <ExportMenu />
-      </div>
+    <aside className="panel inspector" data-tab={tab} aria-label="Look controls">
+      <div className="panelTitle"><h2>Properties</h2><span className="propertyDot" /></div>
+      <div className="inspectorTabs" role="group" aria-label="Control group">{['style', 'motion', 'canvas'].map(t => <button key={t} aria-pressed={tab === t} className={tab === t ? 'on' : ''} onClick={() => setTab(t)}>{t}</button>)}</div>
       <Section title="Look">
         <input
           className="name"
+          aria-label="Look name"
           value={look.name}
           onChange={(ev) => update((l) => (l.name = ev.target.value))}
           placeholder="Name"
@@ -167,30 +173,34 @@ export function Inspector() {
         </label>
       </Section>
 
-      <Section
-        title="Ombre"
-        right={
-          <button className="mini" onClick={randomize} title="Randomise colours and flow">
-            Shuffle
-          </button>
-        }
-      >
+      <Section title="Ombre">
+        <div className="paletteHeading"><span>Colour palettes</span><span>{activePalette?.name ?? 'Custom'}</span></div>
+        <div className="paletteGrid" role="group" aria-label="Colour palettes">
+          {COLOR_PALETTES.map(p => (
+            <button key={p.id} className="paletteOption" aria-label={`Apply ${p.name} palette`} aria-pressed={activePalette?.id === p.id} onClick={() => update(l => {
+              l.gradient.stops = p.stops.map(s => ({ ...s }));
+              if (l.pattern.type === 'pixelart') l.pattern.keep = false;
+            })}>
+              <span className="palettePreview" style={{ background: gradientPreview(p.stops) }} aria-hidden="true" />
+              <span>{p.name}</span>
+            </button>
+          ))}
+        </div>
+        <p className="hint small">Choose a palette, then fine-tune its colours below.</p>
         <Seg<GradientType> value={g.type} options={['mesh', 'linear', 'radial']} onChange={(v) => update((l) => (l.gradient.type = v))} />
         <div className="stops">
           <div
             className="ramp"
             style={{
-              background: `linear-gradient(90deg, ${[...g.stops]
-                .sort((a, b) => a.pos - b.pos)
-                .map((s) => `${s.color} ${Math.round(s.pos * 100)}%`)
-                .join(', ')})`,
+              background: gradientPreview(g.stops),
             }}
           />
           {g.stops.map((s, i) => (
             <div className="stop" key={i}>
-              <input type="color" value={s.color} onChange={(ev) => update((l) => (l.gradient.stops[i].color = ev.target.value))} />
+              <input type="color" aria-label={`Stop ${i + 1} colour`} value={s.color} onChange={(ev) => update((l) => (l.gradient.stops[i].color = ev.target.value))} />
               <input
                 type="range"
+                aria-label={`Stop ${i + 1} position`}
                 min={0}
                 max={1}
                 step={0.01}
@@ -228,7 +238,7 @@ export function Inspector() {
         <Slider label="Seed" value={g.seed} min={0} max={999} step={1} onChange={(v) => update((l) => (l.gradient.seed = v))} />
       </Section>
 
-      <Section title="Cursor" right={<Toggle label="" value={it.on} onChange={(v) => update((l) => (l.interact.on = v))} />}>
+      <Section title="Cursor" right={<Toggle label="" ariaLabel="Enable cursor interaction" value={it.on} onChange={(v) => update((l) => (l.interact.on = v))} />}>
         <Seg<InteractMode> value={it.mode} options={['warp', 'light', 'orb', 'focus']} onChange={(v) => update((l) => (l.interact.mode = v))} />
         <p className="hint small">
           {it.mode === 'warp' && 'The ombre field drifts toward the pointer with a gentle bend.'}
@@ -243,13 +253,7 @@ export function Inspector() {
       </Section>
 
       <Section title="Pattern">
-        <div className="techs">
-          {TECH_ORDER.map((t) => (
-            <button key={t} className={pt.type === t ? 'on' : ''} onClick={() => update((l) => (l.pattern.type = t))}>
-              {TECH_LABEL[t]}
-            </button>
-          ))}
-        </div>
+        <label className="techniquePicker"><span>Technique</span><select aria-label="Pattern technique" value={pt.type} onChange={e => update(l => {l.pattern.type = e.target.value as PatternType;})}>{TECH_ORDER.map(t => <option key={t} value={t}>{TECH_LABEL[t]}</option>)}</select></label>
         {pt.type !== 'none' && (
           <>
             <p className="hint small">{TECH_HINT[pt.type]}</p>
@@ -295,6 +299,12 @@ export function Inspector() {
             {TECH_SLIDERS[pt.type].map((c) => (
               <Slider key={c.key} label={c.label} value={pt[c.key]} min={c.min} max={c.max} step={c.step ?? 0.01} fmt={c.fmt} onChange={(v) => update((l) => ((l.pattern[c.key] as number) = v))} />
             ))}
+            {pt.type === 'pixelart' && pt.keep && <Slider label="Colour levels" value={pt.depth} min={2} max={8} step={1} onChange={v => update(l => { l.pattern.depth = v; })} />}
+            {pt.type === 'pixelart' && pt.shape === 'square' && <>
+              <label className="outlineColour">Outline colour <input type="color" aria-label="Outline colour" value={pt.ink} onChange={ev => update(l => { l.pattern.ink = ev.target.value; })} /></label>
+              <Slider label="Outline width" value={pt.gap} min={0} max={2} step={1} fmt={v => v === 0 ? 'off' : `${v} cell${v === 1 ? '' : 's'}`} onChange={v => update(l => { l.pattern.gap = v; })} />
+              <Slider label="Contour detail" value={pt.shade} min={0} max={1} onChange={v => update(l => { l.pattern.shade = v; })} />
+            </>}
             <Toggle label="Invert" value={pt.invert} onChange={(v) => update((l) => (l.pattern.invert = v))} />
             <p className="hint small" style={{ marginTop: 10 }}>Subject. With a flat background the pattern is applied to the subject only.</p>
             <Toggle label="Subject only" value={pt.subject} onChange={(v) => update((l) => (l.pattern.subject = v))} />
@@ -322,7 +332,7 @@ export function Inspector() {
         </Section>
       )}
 
-      <Section title="Orb" right={<Toggle label="" value={o.on} onChange={(v) => update((l) => (l.orb.on = v))} />}>
+      <Section title="Orb" right={<Toggle label="" ariaLabel="Enable orb" value={o.on} onChange={(v) => update((l) => (l.orb.on = v))} />}>
         <Slider label="X" value={o.x} min={0} max={1} onChange={(v) => update((l) => (l.orb.x = v))} />
         <Slider label="Y" value={o.y} min={0} max={1} onChange={(v) => update((l) => (l.orb.y = v))} />
         <Slider label="Radius" value={o.radius} min={0.01} max={0.6} onChange={(v) => update((l) => (l.orb.radius = v))} />
@@ -337,14 +347,14 @@ export function Inspector() {
         </Section>
       )}
 
-      <Section title="Waves" right={<Toggle label="" value={e.waves.on} onChange={(v) => update((l) => (l.effects.waves.on = v))} />}>
+      <Section title="Waves" right={<Toggle label="" ariaLabel="Enable waves" value={e.waves.on} onChange={(v) => update((l) => (l.effects.waves.on = v))} />}>
         <Slider label="Amplitude" value={e.waves.amplitude} min={0} max={0.2} step={0.001} onChange={(v) => update((l) => (l.effects.waves.amplitude = v))} />
         <Slider label="Frequency" value={e.waves.frequency} min={0.5} max={10} onChange={(v) => update((l) => (l.effects.waves.frequency = v))} />
         <Slider label="Falloff" value={e.waves.falloff} min={0} max={1} onChange={(v) => update((l) => (l.effects.waves.falloff = v))} />
         <Slider label="Cycles / loop" value={e.waves.cycles} min={1} max={4} step={1} onChange={(v) => update((l) => (l.effects.waves.cycles = v))} />
       </Section>
 
-      <Section title="Grain" right={<Toggle label="" value={e.grain.on} onChange={(v) => update((l) => (l.effects.grain.on = v))} />}>
+      <Section title="Grain" right={<Toggle label="" ariaLabel="Enable grain" value={e.grain.on} onChange={(v) => update((l) => (l.effects.grain.on = v))} />}>
         <Slider label="Amount" value={e.grain.amount} min={0} max={0.6} onChange={(v) => update((l) => (l.effects.grain.amount = v))} />
         <Slider label="Size" value={e.grain.size} min={0.5} max={6} step={0.1} onChange={(v) => update((l) => (l.effects.grain.size = v))} />
       </Section>

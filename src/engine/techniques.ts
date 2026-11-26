@@ -205,7 +205,9 @@ void main(){
     outColor = finish(mix(u_paper, wc, on), vUv);
     return;
   }
-  vec3 inkc = u_keep > 0.5 ? c : u_ink;
+  // Monochrome glyphs also carry tone through ink strength so similarly dense
+  // characters do not flatten neighbouring shades into the same grey.
+  vec3 inkc = u_keep > 0.5 ? c : mix(u_paper, u_ink, clamp(v * 1.6, 0.0, 1.0));
   vec3 col = mix(u_paper, inkc, on);
   outColor = finish(col, vUv);
 }
@@ -319,8 +321,7 @@ void main(){
     return;
   }
   if(u_shape == 1){
-    // linear dashes: one direction per region (nearest family, no blending), fixed dash
-    // length and spacing, brick offset on alternate rows, constant width, no tone fill
+    // Linear dashes keep their direction and spacing while density and width carry tone.
     vec2 n = fract(k) < 0.5 ? n0 : n1;
     vec2 tdir = vec2(-n.y, n.x);
     float row = floor(dot(P, n) / px);
@@ -331,13 +332,11 @@ void main(){
     // tone density (u_shade): darker tone keeps more dashes, lighter tone drops them (pin 61)
     float lumD = lumAt(vUv);
     float darkD = clamp((1.0 - lumD - (u_threshold - 0.5)) * (0.6 + u_dither), 0.0, 1.0);
-    dash *= step(hash(vec2(row, floor(along / 3.4)) + 0.9), mix(1.0, darkD * 1.5, u_shade));
+    dash *= step(hash(vec2(row, floor(along / 3.4)) + 0.9), mix(1.0, darkD, u_shade));
     float capA = smoothstep(0.0, 0.08, seg) * (1.0 - smoothstep(0.64, 0.72, seg));
-    float w = 0.14 + u_gap * 0.1;
+    float w = (0.1 + u_gap * 0.3) * mix(1.0, darkD, u_shade);
     float line = (1.0 - smoothstep(w - 0.8 / px, w + 0.8 / px, abs(fr))) * dash * max(capA, 0.6);
-    float lumC = lumAt(vUv);
-    float darkC = clamp((1.0 - lumC - (u_threshold - 0.5)) * (0.6 + u_dither), 0.0, 1.0);
-    line *= step(0.06, darkC);
+    line *= smoothstep(0.0, 0.15, darkD) * mix(1.0, darkD, u_shade);
     vec3 cC = texture(u_image, vUv).rgb;
     vec3 inkD = u_keep > 0.5 ? cC * 0.6 : u_ink;
     outColor = finish(mix(u_paper, inkD, line), vUv);

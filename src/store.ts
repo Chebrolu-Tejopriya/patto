@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { Quality } from './engine/motion';
-import { cloneLook, defaultLook, normalizeLook, uid, type Look } from './model/look';
+import { cloneLook, normalizeLook, uid, type Look } from './model/look';
 import { BUILT_IN_PRESETS } from './model/presets';
 
 const STORAGE_KEY = 'patterns.saved.v1';
@@ -42,7 +42,6 @@ export type State = {
   saveVersion: () => void;
   saveAsNew: (name: string) => void;
   deleteSaved: (id: string, version: number) => void;
-  randomize: () => void;
 };
 
 /** Canvas size that matches an image's aspect, longest side 1920. */
@@ -132,31 +131,4 @@ export const useStore = create<State>((set, get) => ({
     set({ saved: next });
   },
 
-  randomize: () =>
-    set((s) => {
-      const l = cloneLook(s.look);
-      const base = defaultLook();
-      l.gradient.seed = Math.floor(Math.random() * 1000);
-      l.gradient.warp = +(Math.random() * 0.9 + 0.1).toFixed(2);
-      l.gradient.scale = +(Math.random() * 2.5 + 0.6).toFixed(2);
-      l.gradient.angle = Math.floor(Math.random() * 360);
-      const hue = Math.random() * 360;
-      l.gradient.stops = [0, 0.33, 0.66, 1].map((pos, i) => ({
-        pos,
-        color: hsl(hue + i * (25 + Math.random() * 40), 60 + Math.random() * 30, 15 + i * 22),
-      }));
-      l.motion = base.motion;
-      return { look: l };
-    }),
 }));
-
-function hsl(h: number, s: number, l: number): string {
-  h = ((h % 360) + 360) % 360;
-  s /= 100;
-  l /= 100;
-  const k = (n: number) => (n + h / 30) % 12;
-  const a = s * Math.min(l, 1 - l);
-  const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
-  const to = (x: number) => Math.round(x * 255).toString(16).padStart(2, '0');
-  return `#${to(f(0))}${to(f(8))}${to(f(4))}`;
-}

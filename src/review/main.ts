@@ -10,6 +10,7 @@ type Row = { i: number; preset: string; status: 'used' | 'partial' | 'unused'; n
 type Feedback = Record<string, { text?: string; eliminated?: boolean; at?: string }>;
 
 const TECH_LABEL: Record<string, string> = {
+  matty: 'Matty work', pixelart: 'Pixel art',
   bitmap: 'Bitmap', halftone: 'Halftone', print: 'Print', ascii: 'ASCII', stitch: 'Stitch', hatch: 'Engrave',
   riso: 'Riso', papercut: 'Paper cut', tiles: 'Mosaic', cells: 'Cells', split: 'Split', blocks: 'Blocks', glyph: 'Glyphs', voxel: 'Voxel', mosaic: 'Shards', glitch: 'Glitch', soft: 'Airbrush', none: 'none',
 };

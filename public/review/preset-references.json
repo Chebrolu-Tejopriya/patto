@@ -1,0 +1,268 @@
+{
+  "outlined-sprite": {
+    "label": "Your original reference",
+    "images": [{
+      "image": "/review/references/outlined-sprite.png",
+      "title": "Blue pixel flower with dark stepped outlines and shaded green leaves",
+      "url": "/review/references/outlined-sprite.png"
+    }]
+  },
+  "autumn-pixels": {
+    "label": "Your original reference",
+    "images": [{
+      "image": "/review/references/autumn-pixels.png",
+      "title": "Autumn tree in flat yellow, orange, coral and plum pixels",
+      "url": "/review/references/autumn-pixels.png"
+    }]
+  },
+  "matty-work": {
+    "label": "Your original reference",
+    "images": [
+      {
+        "image": "/review/references/matty-work.png",
+        "title": "Matty-work reference: moon, stars and clouds in navy, blue and cream thread",
+        "url": "/review/references/matty-work.png"
+      }
+    ]
+  },
+  "engraving": {
+    "label": "Shared style reference",
+    "images": [
+      {
+        "image": "/review/pins/47.jpg",
+        "title": "chair",
+        "url": "https://www.pinterest.com/pin/1069323505300927250/"
+      },
+      {
+        "image": "/review/pins/61.jpg",
+        "title": "Bitmap Valley Crop  #ArtifaktPrints #Poster#Canvas #DigitalArt #Graphic #GraphicDesign #Illustration #WallArt #HomeDecor #ModernArt #ArtCommunity #ArtShop #artshoponline",
+        "url": "https://www.pinterest.com/pin/1069323505301077812/"
+      }
+    ]
+  },
+  "copper-plate": {
+    "label": "Shared style reference",
+    "images": [
+      {
+        "image": "/review/pins/47.jpg",
+        "title": "chair",
+        "url": "https://www.pinterest.com/pin/1069323505300927250/"
+      },
+      {
+        "image": "/review/pins/61.jpg",
+        "title": "Bitmap Valley Crop  #ArtifaktPrints #Poster#Canvas #DigitalArt #Graphic #GraphicDesign #Illustration #WallArt #HomeDecor #ModernArt #ArtCommunity #ArtShop #artshoponline",
+        "url": "https://www.pinterest.com/pin/1069323505301077812/"
+      }
+    ]
+  },
+  "print-screen": {
+    "label": "Shared style reference",
+    "images": [
+      {
+        "image": "/review/pins/11.jpg",
+        "title": "",
+        "url": "https://www.pinterest.com/pin/1069323505300901521/"
+      },
+      {
+        "image": "/review/pins/12.jpg",
+        "title": "",
+        "url": "https://www.pinterest.com/pin/1069323505300901519/"
+      }
+    ]
+  },
+  "led-matrix": {
+    "label": "Shared style reference",
+    "images": [
+      {
+        "image": "/review/pins/09.jpg",
+        "title": "Ascii experiments",
+        "url": "https://www.pinterest.com/pin/1069323505300927086/"
+      },
+      {
+        "image": "/review/pins/53.jpg",
+        "title": "Motion explorations by @cherry.visuals\n\n——\nSee your work featured? Engage and be observed.",
+        "url": "https://www.pinterest.com/pin/1069323505300927208/"
+      }
+    ]
+  },
+  "terminal-ascii": {
+    "label": "Shared style reference",
+    "images": [
+      {
+        "image": "/review/pins/01.jpg",
+        "title": "PiXEL ART 🎨 ASCII-STYLE ▪️▫️🔲",
+        "url": "https://www.pinterest.com/pin/1124492600739723465/"
+      }
+    ]
+  },
+  "typewriter": {
+    "label": "Shared style reference",
+    "images": [
+      {
+        "image": "/review/pins/01.jpg",
+        "title": "PiXEL ART 🎨 ASCII-STYLE ▪️▫️🔲",
+        "url": "https://www.pinterest.com/pin/1124492600739723465/"
+      }
+    ]
+  },
+  "voxel-night": {
+    "label": "Shared style reference",
+    "images": [
+      {
+        "image": "/review/pins/20.jpg",
+        "title": "",
+        "url": "https://www.pinterest.com/pin/1069323505300927236/"
+      }
+    ]
+  },
+  "pixel-cutout": {
+    "label": "Original reference",
+    "images": [
+      {
+        "image": "/review/pins/35.jpg",
+        "title": "nurture by Porter Robinson",
+        "url": "https://www.pinterest.com/pin/1069323505300927248/"
+      }
+    ]
+  },
+  "teal-monolith": {
+    "label": "Original board reference",
+    "images": [
+      {
+        "image": "/review/references/teal-monolith.jpg",
+        "title": "a man standing in the middle of a dark room next to a giant round object",
+        "url": "https://in.pinterest.com/pin/1069323505292224919/"
+      }
+    ]
+  },
+  "dune-dusk": {
+    "label": "Original board reference",
+    "images": [
+      {
+        "image": "/review/references/dune-dusk.jpg",
+        "title": "an abstract desert scene with a star in the sky",
+        "url": "https://in.pinterest.com/pin/1069323505292225190/"
+      }
+    ]
+  },
+  "arch-pool": {
+    "label": "Original board reference",
+    "images": [
+      {
+        "image": "/review/references/arch-pool.jpg",
+        "title": "an empty swimming pool with the moon in the sky and water reflecting off it's surface",
+        "url": "https://in.pinterest.com/pin/1069323505292226636/"
+      }
+    ]
+  },
+  "ember-arches": {
+    "label": "Original board reference",
+    "images": [
+      {
+        "image": "/review/references/ember-arches.jpg",
+        "title": "an orange and yellow painting with mountains in the background",
+        "url": "https://in.pinterest.com/pin/1069323505292224982/"
+      }
+    ]
+  },
+  "terracotta": {
+    "label": "Original board reference",
+    "images": [
+      {
+        "image": "/review/references/terracotta.jpg",
+        "title": "an orange and blue building with the sky in the background",
+        "url": "https://in.pinterest.com/pin/1069323505292229099/"
+      }
+    ]
+  },
+  "lavender-hour": {
+    "label": "Original board reference",
+    "images": [
+      {
+        "image": "/review/references/lavender-hour.jpg",
+        "title": "an abstract painting with purple and pink colors on the walls, along with a circular object in the middle",
+        "url": "https://in.pinterest.com/pin/1069323505292227077/"
+      }
+    ]
+  },
+  "violet-vortex": {
+    "label": "Original board reference",
+    "images": [
+      {
+        "image": "/review/references/violet-vortex.jpg",
+        "title": "This contains an image of: Mintlify - The Intelligent Knowledge Platform",
+        "url": "https://in.pinterest.com/pin/1069323505292224962/"
+      }
+    ]
+  },
+  "sodium-columns": {
+    "label": "Original board reference",
+    "images": [
+      {
+        "image": "/review/references/sodium-columns.jpg",
+        "title": "an orange and blue abstract background with lines in the foreground, on top of each other",
+        "url": "https://in.pinterest.com/pin/1069323505292224939/"
+      }
+    ]
+  },
+  "neon-pyramid": {
+    "label": "Original board reference",
+    "images": [
+      {
+        "image": "/review/references/neon-pyramid.jpg",
+        "title": "an image of a pink and blue background with a white triangle in the foreground",
+        "url": "https://in.pinterest.com/pin/1069323505292227770/"
+      }
+    ]
+  },
+  "noir-arcade": {
+    "label": "Original board reference",
+    "images": [
+      {
+        "image": "/review/references/noir-arcade.jpg",
+        "title": "a black and white photo of an empty room with water in the foreground at night",
+        "url": "https://in.pinterest.com/pin/1069323505292224922/"
+      }
+    ]
+  },
+  "snow-lilac": {
+    "label": "Original board reference",
+    "images": [
+      {
+        "image": "/review/references/snow-lilac.jpg",
+        "title": "a purple ball sitting on top of a snow covered ground",
+        "url": "https://in.pinterest.com/pin/1069323505292227534/"
+      }
+    ]
+  },
+  "glacier": {
+    "label": "Original board reference",
+    "images": [
+      {
+        "image": "/review/references/glacier.jpg",
+        "title": "an abstract image of snow covered mountains against a blue sky",
+        "url": "https://in.pinterest.com/pin/1069323505292224927/"
+      }
+    ]
+  },
+  "acid-ridge": {
+    "label": "Original board reference",
+    "images": [
+      {
+        "image": "/review/references/acid-ridge.jpg",
+        "title": "an abstract painting with yellow and green colors in the desert, on a blue sky background",
+        "url": "https://in.pinterest.com/pin/1069323505292224974/"
+      }
+    ]
+  },
+  "magenta-haze": {
+    "label": "Original board reference",
+    "images": [
+      {
+        "image": "/review/references/magenta-haze.jpg",
+        "title": "an abstract painting with pink, blue and purple shapes in the sky above sand dunes",
+        "url": "https://in.pinterest.com/pin/1069323505292227547/"
+      }
+    ]
+  }
+}

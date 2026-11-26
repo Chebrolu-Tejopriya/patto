@@ -66,7 +66,7 @@ export function ExportMenu() {
 
   return (
     <div className="exportWrap" ref={popRef}>
-      <button className={'primary' + (open ? ' on' : '')} onClick={() => setOpen((o) => !o)}>
+      <button className={'primary' + (open ? ' on' : '')} aria-expanded={open} aria-haspopup="dialog" onClick={() => setOpen((o) => !o)}>
         Export
       </button>
       {open && (

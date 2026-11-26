@@ -3,10 +3,14 @@ import { BITMAP_FRAG, VOXEL_FRAG, BLIT_FRAG, GRADIENT_FRAG, GRAIN_FRAG, STYLIZE_
 import { hexToRgb, MAX_STOPS, type Look, type Pattern, type PatternType } from '../model/look';
 import { ASCII_FRAG, GLITCH_FRAG, HALFTONE_FRAG, HATCH_FRAG, MOSAIC_FRAG, PAPERCUT_FRAG, PRINT_FRAG, RISO_FRAG, SOFT_FRAG, TILES_FRAG } from './techniques';
 import { BLOCKS_FRAG, CELLS_FRAG, GLYPH_FRAG, SPLIT_FRAG, STITCH_FRAG } from './techniques2';
+import { MATTY_FRAG } from './matty';
+import { PIXEL_ART_FRAG } from './pixelart';
 
 const TECH_SRC: Partial<Record<PatternType, string>> = {
   halftone: HALFTONE_FRAG,
   stitch: STITCH_FRAG,
+  matty: MATTY_FRAG,
+  pixelart: PIXEL_ART_FRAG,
   ascii: ASCII_FRAG,
   hatch: HATCH_FRAG,
   glitch: GLITCH_FRAG,
@@ -418,6 +422,7 @@ export class Renderer {
       this.common(p, w, h, phase);
       p.tex('u_image', 0, src.tex);
       this.setTech(p, pt, h);
+      if (pt.type === 'pixelart') this.uploadRamp(p, n);
       this.draw();
       [src, dst] = [dst, src];
     }

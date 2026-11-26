@@ -6,12 +6,31 @@ import { BUILT_IN_PRESETS } from '../model/presets';
 
 type Verdict = 'good' | 'meh' | 'bad';
 type Feedback = Record<string, { verdict?: Verdict; text?: string; at?: string }>;
+type Reference = { image: string; title: string; url: string };
+type ReferenceGroup = { label: string; images: Reference[] };
+type Pin = { i: number; title: string; url: string };
+type Mapping = { rows: { i: number; preset: string; status: string }[] };
 const IMG_NAME = new URLSearchParams(location.search).get('img') ?? 'test-image';
 const IMAGE = `/review/${/^[a-z0-9-]+$/i.test(IMG_NAME) ? IMG_NAME : 'test-image'}.jpg`;
 const FILE = 'test-feedback';
 
 async function main() {
-  const feedback: Feedback = await fetch(`/__review/feedback?file=${FILE}`).then((r) => r.json()).catch(() => ({}));
+  const [feedback, pins, mapping, extraReferences]: [Feedback, Pin[], Mapping, Record<string, ReferenceGroup>] = await Promise.all([
+    fetch(`/__review/feedback?file=${FILE}`).then((r) => r.json()).catch(() => ({})),
+    fetch('/review/meta.json').then((r) => r.json()),
+    fetch('/review/mapping.json').then((r) => r.json()),
+    fetch('/review/preset-references.json').then((r) => r.json()),
+  ]);
+  const references = new Map<string, ReferenceGroup>();
+  const pinsById = new Map(pins.map((pin) => [pin.i, pin]));
+  for (const row of mapping.rows) {
+    const pin = pinsById.get(row.i);
+    if (!pin || row.status === 'unused') continue;
+    const group = references.get(row.preset) ?? { label: 'Original reference', images: [] };
+    group.images.push({ image: `/review/pins/${String(pin.i).padStart(2, '0')}.jpg`, title: pin.title, url: pin.url });
+    references.set(row.preset, group);
+  }
+  for (const [id, group] of Object.entries(extraReferences)) references.set(id, group);
   (document.getElementById('src') as HTMLImageElement).src = IMAGE;
   const grid = document.getElementById('grid')!;
   const filtersEl = document.getElementById('filters')!;
@@ -85,10 +104,23 @@ async function main() {
     const fb = (feedback[p.id] ??= {});
     const el = document.createElement('div');
     el.className = 'card';
+    el.id = p.id;
     el.dataset.kind = p.kind;
+    el.dataset.preset = p.id;
     el.innerHTML = `
-      <div class="fig"><canvas></canvas><span class="tag">${p.kind}</span></div>
       <div><b>${p.name}</b> <small>${p.pattern.type === 'none' ? 'ombre grading' : p.pattern.type}</small></div>
+      <div class="comparison">
+        <figure class="reference">
+          <figcaption></figcaption>
+          <a class="fig reference-image" target="_blank" rel="noreferrer"><img loading="lazy" decoding="async" /></a>
+          <div class="reference-controls"></div>
+          <a class="source-link" target="_blank" rel="noreferrer">Open source</a>
+        </figure>
+        <figure>
+          <figcaption>Your image with this preset</figcaption>
+          <div class="fig"><canvas></canvas></div>
+        </figure>
+      </div>
       <div class="verdict">
         <button class="good" data-v="good">works</button>
         <button class="meh" data-v="meh">so-so</button>
@@ -96,8 +128,41 @@ async function main() {
       </div>
       <textarea placeholder="What is right, what is wrong, what to change."></textarea>
       <div class="saved"></div>`;
+    const group = references.get(p.id);
+    const referenceEl = el.querySelector<HTMLElement>('.reference')!;
+    referenceEl.querySelector('figcaption')!.textContent = group?.label ?? 'Reference unavailable';
+    if (group?.images.length) {
+      const image = referenceEl.querySelector('img')!;
+      const imageLink = referenceEl.querySelector<HTMLAnchorElement>('.reference-image')!;
+      const sourceLink = referenceEl.querySelector<HTMLAnchorElement>('.source-link')!;
+      const showReference = (index: number) => {
+        const reference = group.images[index];
+        image.src = reference.image;
+        image.alt = reference.title || `${p.name} reference`;
+        imageLink.href = reference.image;
+        imageLink.setAttribute('aria-label', `View full reference for ${p.name}`);
+        sourceLink.href = reference.url;
+      };
+      showReference(0);
+      if (group.images.length > 1) {
+        const picker = document.createElement('select');
+        picker.setAttribute('aria-label', `${p.name} reference image`);
+        group.images.forEach((reference, index) => {
+          const option = document.createElement('option');
+          option.value = String(index);
+          option.textContent = `${index + 1} / ${group.images.length} — ${reference.title || 'Untitled reference'}`;
+          picker.appendChild(option);
+        });
+        picker.addEventListener('change', () => showReference(Number(picker.value)));
+        referenceEl.querySelector('.reference-controls')!.appendChild(picker);
+      }
+    } else {
+      referenceEl.querySelector('.reference-image')!.remove();
+      referenceEl.querySelector('.source-link')!.remove();
+    }
     grid.appendChild(el);
     const ta = el.querySelector('textarea')!;
+    ta.setAttribute('aria-label', `${p.name} feedback`);
     ta.value = fb.text ?? '';
     const reflect = () => {
       el.dataset.verdict = fb.verdict ?? '';
@@ -130,6 +195,8 @@ async function main() {
   }
   summary();
   applyFilter();
+  // Preset links can arrive before the asynchronously rendered cards exist.
+  document.getElementById(location.hash.slice(1))?.scrollIntoView({ block: 'start' });
 }
 
 main().catch((e) => {
