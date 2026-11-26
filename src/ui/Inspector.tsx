@@ -3,6 +3,7 @@ import { MAX_STOPS, type BgMode, type DitherMode, type GradientType, type Intera
 import { sizeForImage, useStore } from '../store';
 import { Section, Seg, Slider, Toggle } from './controls';
 import { COLOR_PALETTES, gradientPreview } from '../model/palettes';
+import { Icon } from './Icon';
 
 
 // ---- Pattern technique control tables -------------------------------------
@@ -37,7 +38,7 @@ const TECH_MODES: Partial<Record<PatternType, [Shape, string][]>> = {
   hatch: [['dot', 'tone'], ['square', 'dash'], ['diamond', 'line art']],
   riso: [['dot', 'plates'], ['square', 'line raster']],
   soft: [['dot', 'blur'], ['square', 'glass']],
-  ascii: [['dot', 'glyphs'], ['square', 'words']],
+  ascii: [['dot', 'glyphs'], ['square', 'words'], ['diamond', 'coloured']],
   voxel: [['dot', 'height'], ['square', 'slab']],
   split: [['dot', 'half pixel'], ['square', 'cut-out']],
 };
@@ -57,7 +58,7 @@ const TECH_HINT: Record<PatternType, string> = {
   tiles: 'Irregular translucent tiles over the thick parts of the subject only, with a soft shadow copy beneath. Thin features and the background stay as they are.',
   bitmap: '1-bit ordered dither, like early Mac and handheld screens.',
   halftone: 'Dots on a rotated grid grow with tone. Square on dark reads as an LED matrix.',
-  ascii: 'A glyph ramp picked by tone, drawn with a built-in 5x7 font.',
+  ascii: 'Characters follow image tone. Coloured mode uses fine, varied symbols on paper; keep image colours or apply a gradient palette.',
   stitch: 'Cross-stitch threads on aida fabric; light areas stay as fabric.',
   hatch: 'Engraving strokes that follow the contours of the image and cross in the shadows.',
   riso: 'Spot-ink plates printed slightly out of register on textured paper.',
@@ -68,6 +69,16 @@ const TECH_HINT: Record<PatternType, string> = {
   glitch: 'Banded slips, chunky blocks and chroma split, stepping 12 states per loop.',
   soft: 'Airbrushed blur on a flat wash, with bloom and soft tonal bands. Add grain for the poster look.',
 };
+const CURSOR_HINT: Record<InteractMode, string> = {
+  warp: 'The ombre field drifts toward the pointer with a gentle bend.',
+  light: 'A soft wash of the ramp colour follows the pointer.',
+  orb: 'The orb follows the pointer (turn the orb on).',
+  focus: 'Pattern detail responds to the pointer.',
+};
+const PALETTE_HINT = 'Choose a palette, then fine-tune its colours below.';
+const SUBJECT_HINT = 'With a flat background, the pattern is applied to the subject only.';
+const MARKS_HINT = 'none, dot, plus, ring, disc, square, xsquare, half, fill, dotscreen, screen, x, grid, stipple';
+const GROUND_HINT = 'One mark tiled over the background, or none.';
 const TECH_SWATCHES: Record<PatternType, [ColorKey, string][]> = {
   pixelart: [['paper', 'Background']],
   matty: [['ink', 'Dark thread'], ['mid', 'Mid thread'], ['paper', 'Light thread']],
@@ -139,10 +150,83 @@ export function Inspector() {
   const matchesImage = !!imgSize && imgSize.w === look.size.w && imgSize.h === look.size.h;
   const sizeKey = matchesImage ? 'Match image' : (Object.keys(SIZES).find((k) => SIZES[k][0] === look.size.w && SIZES[k][1] === look.size.h) ?? 'custom');
 
+  const patternSection = (
+      <Section title="Pattern" help={TECH_HINT[pt.type] || undefined}>
+        <label className="techniquePicker" title={TECH_HINT[pt.type] || undefined}><span>Technique</span><select aria-label="Pattern technique" aria-description={TECH_HINT[pt.type] || undefined} value={pt.type} onChange={e => update(l => {l.pattern.type = e.target.value as PatternType;})}>{TECH_ORDER.map(t => <option key={t} value={t}>{TECH_LABEL[t]}</option>)}</select></label>
+        {pt.type !== 'none' && (
+          <>
+            {pt.type === 'bitmap' && (
+              <Seg<DitherMode> value={pt.mode} options={['bayer4', 'bayer8', 'lines', 'noise']} onChange={(v) => update((l) => (l.pattern.mode = v))} />
+            )}
+            {pt.type === 'halftone' && (
+              <Seg<Shape> value={pt.shape} options={['dot', 'square', 'diamond', 'ring']} onChange={(v) => update((l) => (l.pattern.shape = v))} />
+            )}
+            {TECH_MODES[pt.type] && (
+              <div className="seg">
+                {TECH_MODES[pt.type]!.map(([val, label]) => (
+                  <button key={val} className={pt.shape === val ? 'on' : ''} aria-pressed={pt.shape === val} onClick={() => update((l) => (l.pattern.shape = val))}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+            {pt.type === 'cells' && (
+              <label className="marks" title={MARKS_HINT}>
+                <span>Marks per level</span>
+                <input aria-description={MARKS_HINT} value={pt.marks} onChange={(ev) => update((l) => (l.pattern.marks = ev.target.value))} spellCheck={false} />
+              </label>
+            )}
+            {pt.type === 'cells' && (
+              <label className="marks" title={GROUND_HINT}>
+                <span>Ground mark</span>
+                <input aria-description={GROUND_HINT} value={pt.ground ?? 'none'} onChange={(ev) => update((l) => (l.pattern.ground = ev.target.value))} spellCheck={false} />
+              </label>
+            )}
+            <div className="inks">
+              {TECH_SWATCHES[pt.type].filter(([key]) => !(pt.type === 'ascii' && pt.shape === 'diamond' && key === 'ink')).map(([key, label]) => (
+                <label key={key} className={key === 'mid' && pt.type === 'bitmap' && !pt.midtone ? 'dim' : ''}>
+                  <input type="color" aria-label={label} value={pt[key]} onChange={(ev) => update((l) => (l.pattern[key] = ev.target.value))} />
+                  <span>{label}</span>
+                </label>
+              ))}
+              {pt.type === 'bitmap' && <Toggle label="3 tone" value={pt.midtone} onChange={(v) => update((l) => (l.pattern.midtone = v))} />}
+              {TECH_KEEP.has(pt.type) && <Toggle label="Image colours" value={pt.keep} onChange={(v) => update((l) => (l.pattern.keep = v))} />}
+            </div>
+            {TECH_SLIDERS[pt.type].filter(c => !(pt.type === 'ascii' && pt.shape === 'diamond' && c.key === 'breathe')).map((c) => (
+              <Slider key={c.key} label={c.label} value={pt[c.key]} min={c.min} max={c.max} step={c.step ?? 0.01} fmt={c.fmt} onChange={(v) => update((l) => ((l.pattern[c.key] as number) = v))} />
+            ))}
+            {pt.type === 'pixelart' && pt.keep && <Slider label="Colour levels" value={pt.depth} min={2} max={8} step={1} onChange={v => update(l => { l.pattern.depth = v; })} />}
+            {pt.type === 'pixelart' && pt.shape === 'square' && <>
+              <label className="outlineColour">Outline colour <input type="color" aria-label="Outline colour" value={pt.ink} onChange={ev => update(l => { l.pattern.ink = ev.target.value; })} /></label>
+              <Slider label="Outline width" value={pt.gap} min={0} max={2} step={1} fmt={v => v === 0 ? 'off' : `${v} cell${v === 1 ? '' : 's'}`} onChange={v => update(l => { l.pattern.gap = v; })} />
+              <Slider label="Contour detail" value={pt.shade} min={0} max={1} onChange={v => update(l => { l.pattern.shade = v; })} />
+            </>}
+            {pt.type === 'ascii' && pt.shape === 'diamond' && <>
+              <Slider label="Character gap" value={pt.gap} min={0} max={1} onChange={v => update(l => { l.pattern.gap = v; })} />
+              <Slider label="Ink strength" value={pt.shade} min={0} max={1} onChange={v => update(l => { l.pattern.shade = v; })} />
+            </>}
+            <div className="subjectControls">
+            <Toggle label="Invert" value={pt.invert} onChange={(v) => update((l) => (l.pattern.invert = v))} />
+            <Toggle label="Subject only" help={SUBJECT_HINT} value={pt.subject} onChange={(v) => update((l) => (l.pattern.subject = v))} />
+            {pt.subject && (
+              <>
+                <Slider label="Tolerance" value={pt.tolerance} min={0} max={0.6} fmt={(v) => (v > 0 ? v.toFixed(2) : 'auto')} onChange={(v) => update((l) => (l.pattern.tolerance = v))} />
+                <Slider label="Keep thin" value={pt.thin} min={0} max={40} step={1} fmt={(v) => (v ? v + 'px' : 'off')} onChange={(v) => update((l) => (l.pattern.thin = v))} />
+                <Seg<BgMode> value={pt.bgMode} options={['keep', 'paper']} onChange={(v) => update((l) => (l.pattern.bgMode = v))} />
+              </>
+            )}
+            </div>
+          </>
+        )}
+      </Section>
+  );
+
   return (
     <aside className="panel inspector" data-tab={tab} aria-label="Look controls">
-      <div className="panelTitle"><h2>Properties</h2><span className="propertyDot" /></div>
-      <div className="inspectorTabs" role="group" aria-label="Control group">{['style', 'motion', 'canvas'].map(t => <button key={t} aria-pressed={tab === t} className={tab === t ? 'on' : ''} onClick={() => setTab(t)}>{t}</button>)}</div>
+      <div className="inspectorHeader">
+        <div className="panelTitle"><div><h2>Properties</h2><span className="inspectorLookName" title={look.name}>{look.name}</span></div><span className="inspectorMark"><Icon name="sliders" /></span></div>
+        <div className="inspectorTabs" role="group" aria-label="Control group">{(['style', 'motion', 'canvas'] as const).map(t => <button key={t} aria-pressed={tab === t} className={tab === t ? 'on' : ''} onClick={() => setTab(t)}><Icon name={t === 'style' ? 'sliders' : t} /><span>{t}</span></button>)}</div>
+      </div>
       <Section title="Look">
         <input
           className="name"
@@ -173,20 +257,21 @@ export function Inspector() {
         </label>
       </Section>
 
-      <Section title="Ombre">
-        <div className="paletteHeading"><span>Colour palettes</span><span>{activePalette?.name ?? 'Custom'}</span></div>
+      {look.kind === 'pattern' && patternSection}
+
+      <Section title="Ombre" help={PALETTE_HINT}>
+        <div className="paletteHeading"><span title={PALETTE_HINT}>Colour palettes</span><span>{activePalette?.name ?? 'Custom'}</span></div>
         <div className="paletteGrid" role="group" aria-label="Colour palettes">
           {COLOR_PALETTES.map(p => (
             <button key={p.id} className="paletteOption" aria-label={`Apply ${p.name} palette`} aria-pressed={activePalette?.id === p.id} onClick={() => update(l => {
               l.gradient.stops = p.stops.map(s => ({ ...s }));
-              if (l.pattern.type === 'pixelart') l.pattern.keep = false;
+              if (l.pattern.type === 'pixelart' || (l.pattern.type === 'ascii' && l.pattern.shape === 'diamond')) l.pattern.keep = false;
             })}>
               <span className="palettePreview" style={{ background: gradientPreview(p.stops) }} aria-hidden="true" />
               <span>{p.name}</span>
             </button>
           ))}
         </div>
-        <p className="hint small">Choose a palette, then fine-tune its colours below.</p>
         <Seg<GradientType> value={g.type} options={['mesh', 'linear', 'radial']} onChange={(v) => update((l) => (l.gradient.type = v))} />
         <div className="stops">
           <div
@@ -213,7 +298,7 @@ export function Inspector() {
                 onClick={() => update((l) => l.gradient.stops.splice(i, 1))}
                 title="Remove stop"
               >
-                ×
+                <Icon name="close" />
               </button>
             </div>
           ))}
@@ -238,86 +323,15 @@ export function Inspector() {
         <Slider label="Seed" value={g.seed} min={0} max={999} step={1} onChange={(v) => update((l) => (l.gradient.seed = v))} />
       </Section>
 
-      <Section title="Cursor" right={<Toggle label="" ariaLabel="Enable cursor interaction" value={it.on} onChange={(v) => update((l) => (l.interact.on = v))} />}>
+      <Section title="Cursor" help={CURSOR_HINT[it.mode]} right={<Toggle label="" ariaLabel="Enable cursor interaction" value={it.on} onChange={(v) => update((l) => (l.interact.on = v))} />}>
         <Seg<InteractMode> value={it.mode} options={['warp', 'light', 'orb', 'focus']} onChange={(v) => update((l) => (l.interact.mode = v))} />
-        <p className="hint small">
-          {it.mode === 'warp' && 'The ombre field drifts toward the pointer with a gentle bend.'}
-          {it.mode === 'light' && 'A soft wash of the ramp colour follows the pointer.'}
-          {it.mode === 'orb' && 'The orb follows the pointer (turn the orb on).'}
-          {it.mode === 'focus' && 'Bitmap cells step finer under the pointer.'}
-        </p>
         <Slider label="Strength" value={it.strength} min={0} max={1} onChange={(v) => update((l) => (l.interact.strength = v))} />
         <Slider label="Radius" value={it.radius} min={0.05} max={1} onChange={(v) => update((l) => (l.interact.radius = v))} />
         <Slider label="Follow" value={it.follow} min={0.02} max={1} fmt={(v) => (v < 0.25 ? 'lazy' : v < 0.6 ? 'smooth' : v < 0.9 ? 'quick' : 'snappy')} onChange={(v) => update((l) => (l.interact.follow = v))} />
         <Toggle label="Fade when idle" value={it.fadeIdle} onChange={(v) => update((l) => (l.interact.fadeIdle = v))} />
       </Section>
 
-      <Section title="Pattern">
-        <label className="techniquePicker"><span>Technique</span><select aria-label="Pattern technique" value={pt.type} onChange={e => update(l => {l.pattern.type = e.target.value as PatternType;})}>{TECH_ORDER.map(t => <option key={t} value={t}>{TECH_LABEL[t]}</option>)}</select></label>
-        {pt.type !== 'none' && (
-          <>
-            <p className="hint small">{TECH_HINT[pt.type]}</p>
-            {pt.type === 'bitmap' && (
-              <Seg<DitherMode> value={pt.mode} options={['bayer4', 'bayer8', 'lines', 'noise']} onChange={(v) => update((l) => (l.pattern.mode = v))} />
-            )}
-            {pt.type === 'halftone' && (
-              <Seg<Shape> value={pt.shape} options={['dot', 'square', 'diamond', 'ring']} onChange={(v) => update((l) => (l.pattern.shape = v))} />
-            )}
-            {TECH_MODES[pt.type] && (
-              <div className="seg">
-                {TECH_MODES[pt.type]!.map(([val, label]) => (
-                  <button key={val} className={pt.shape === val ? 'on' : ''} onClick={() => update((l) => (l.pattern.shape = val))}>
-                    {label}
-                  </button>
-                ))}
-              </div>
-            )}
-            {pt.type === 'cells' && (
-              <label className="marks">
-                <span>Marks per level</span>
-                <input value={pt.marks} onChange={(ev) => update((l) => (l.pattern.marks = ev.target.value))} spellCheck={false} />
-                <small>none, dot, plus, ring, disc, square, xsquare, half, fill, dotscreen, screen, x, grid, stipple</small>
-              </label>
-            )}
-            {pt.type === 'cells' && (
-              <label className="marks">
-                <span>Ground mark</span>
-                <input value={pt.ground ?? 'none'} onChange={(ev) => update((l) => (l.pattern.ground = ev.target.value))} spellCheck={false} />
-                <small>one mark tiled over the background, or none</small>
-              </label>
-            )}
-            <div className="inks">
-              {TECH_SWATCHES[pt.type].map(([key, label]) => (
-                <label key={key} className={key === 'mid' && pt.type === 'bitmap' && !pt.midtone ? 'dim' : ''}>
-                  <input type="color" value={pt[key]} onChange={(ev) => update((l) => (l.pattern[key] = ev.target.value))} />
-                  <span>{label}</span>
-                </label>
-              ))}
-              {pt.type === 'bitmap' && <Toggle label="3 tone" value={pt.midtone} onChange={(v) => update((l) => (l.pattern.midtone = v))} />}
-              {TECH_KEEP.has(pt.type) && <Toggle label="Image colours" value={pt.keep} onChange={(v) => update((l) => (l.pattern.keep = v))} />}
-            </div>
-            {TECH_SLIDERS[pt.type].map((c) => (
-              <Slider key={c.key} label={c.label} value={pt[c.key]} min={c.min} max={c.max} step={c.step ?? 0.01} fmt={c.fmt} onChange={(v) => update((l) => ((l.pattern[c.key] as number) = v))} />
-            ))}
-            {pt.type === 'pixelart' && pt.keep && <Slider label="Colour levels" value={pt.depth} min={2} max={8} step={1} onChange={v => update(l => { l.pattern.depth = v; })} />}
-            {pt.type === 'pixelart' && pt.shape === 'square' && <>
-              <label className="outlineColour">Outline colour <input type="color" aria-label="Outline colour" value={pt.ink} onChange={ev => update(l => { l.pattern.ink = ev.target.value; })} /></label>
-              <Slider label="Outline width" value={pt.gap} min={0} max={2} step={1} fmt={v => v === 0 ? 'off' : `${v} cell${v === 1 ? '' : 's'}`} onChange={v => update(l => { l.pattern.gap = v; })} />
-              <Slider label="Contour detail" value={pt.shade} min={0} max={1} onChange={v => update(l => { l.pattern.shade = v; })} />
-            </>}
-            <Toggle label="Invert" value={pt.invert} onChange={(v) => update((l) => (l.pattern.invert = v))} />
-            <p className="hint small" style={{ marginTop: 10 }}>Subject. With a flat background the pattern is applied to the subject only.</p>
-            <Toggle label="Subject only" value={pt.subject} onChange={(v) => update((l) => (l.pattern.subject = v))} />
-            {pt.subject && (
-              <>
-                <Slider label="Tolerance" value={pt.tolerance} min={0} max={0.6} fmt={(v) => (v > 0 ? v.toFixed(2) : 'auto')} onChange={(v) => update((l) => (l.pattern.tolerance = v))} />
-                <Slider label="Keep thin" value={pt.thin} min={0} max={40} step={1} fmt={(v) => (v ? v + 'px' : 'off')} onChange={(v) => update((l) => (l.pattern.thin = v))} />
-                <Seg<BgMode> value={pt.bgMode} options={['keep', 'paper']} onChange={(v) => update((l) => (l.pattern.bgMode = v))} />
-              </>
-            )}
-          </>
-        )}
-      </Section>
+      {look.kind !== 'pattern' && patternSection}
 
       {photo && (
         <Section title="Photo">
@@ -360,6 +374,11 @@ export function Inspector() {
       </Section>
 
       <Section title="Motion">
+        {pt.type === 'ascii' && pt.shape === 'diamond' && <>
+          <Slider label="Sparkles" value={pt.breathe} min={0} max={1} fmt={v => v === 0 ? 'off' : `${Math.round(v * 100)}%`} onChange={v => update(l => { l.pattern.breathe = v; })} />
+          <Slider label="Glint cycles" value={pt.scroll} min={1} max={6} step={1} onChange={v => update(l => { l.pattern.scroll = v; })} />
+          <label className="outlineColour" title="Colour of the animated glints">Sparkle colour <input type="color" aria-label="Sparkle colour" value={pt.mid} onChange={ev => update(l => { l.pattern.mid = ev.target.value; })} /></label>
+        </>}
         <Slider label="Loop" value={look.motion.loopSeconds} min={1} max={20} step={0.5} fmt={(v) => v + 's'} onChange={(v) => update((l) => (l.motion.loopSeconds = v))} />
         <Slider label="FPS" value={look.motion.fps} min={12} max={60} step={1} onChange={(v) => update((l) => (l.motion.fps = v))} />
       </Section>

@@ -422,7 +422,7 @@ export class Renderer {
       this.common(p, w, h, phase);
       p.tex('u_image', 0, src.tex);
       this.setTech(p, pt, h);
-      if (pt.type === 'pixelart') this.uploadRamp(p, n);
+      if (pt.type === 'pixelart' || pt.type === 'ascii') this.uploadRamp(p, n);
       this.draw();
       [src, dst] = [dst, src];
     }

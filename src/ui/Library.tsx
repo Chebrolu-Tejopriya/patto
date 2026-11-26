@@ -21,7 +21,7 @@ export function Library({ collection: tab }: { collection: Collection }) {
   return (
     <aside className="panel library" aria-label="Preset library">
       <div className="panelTitle"><h2>{tab === 'patterns' ? 'Effects' : 'Saved looks'}</h2><span className="countBadge">{source.length}</span></div>
-      <div className="libraryTools"><label className="search"><Icon name="search" /><input placeholder="Search effects" aria-label="Search presets" value={query} onChange={e => setQuery(e.target.value)} />{query && <button className="x" aria-label="Clear search" onClick={() => setQuery('')}>&times;</button>}</label></div>
+      <div className="libraryTools"><label className="search"><Icon name="search" /><input placeholder="Search effects" aria-label="Search presets" value={query} onChange={e => setQuery(e.target.value)} />{query && <button className="x" aria-label="Clear search" onClick={() => setQuery('')}><Icon name="close" /></button>}</label></div>
       <div className="libraryScroll">
         {[...groups].map(([group, looks]) => <section className="effectGroup" key={group} aria-label={group}>
           <h3>{group}<span>{looks.length}</span></h3>
@@ -29,7 +29,7 @@ export function Library({ collection: tab }: { collection: Collection }) {
             {looks.map(p => <div key={p.id + ':' + p.version} className={'card' + (p.id === look.id && (tab !== 'saved' || p.version === look.version) ? ' active' : '')}>
               <button className="thumbBtn" title={p.name + (tab === 'saved' ? ` / v${p.version}` : '')} aria-label={`Apply ${p.name}${tab === 'saved' ? ` version ${p.version}` : ''}`} aria-pressed={p.id === look.id && (tab !== 'saved' || p.version === look.version)} onClick={() => load(p)}><Thumb look={p} /></button>
               <span className="effectTooltip">{p.name}{tab === 'saved' ? ` / v${p.version}` : ''}</span>
-              {tab === 'saved' && <button className="deleteLook" title="Delete saved version" aria-label={`Delete ${p.name} version ${p.version}`} onClick={() => deleteSaved(p.id, p.version)}>&times;</button>}
+              {tab === 'saved' && <button className="deleteLook" title="Delete saved version" aria-label={`Delete ${p.name} version ${p.version}`} onClick={() => deleteSaved(p.id, p.version)}><Icon name="close" /></button>}
             </div>)}
           </div>
         </section>)}

@@ -7,7 +7,9 @@ export function isAnimated(look: Look, hasPhoto: boolean): boolean {
   const gradientVisible = !hasPhoto || look.photo.haze > 0 || look.photo.fit === 'contain';
   if (gradientVisible && look.gradient.flow > 0) return true;
   const p = look.pattern;
-  if (p.type !== 'none' && (p.breathe > 0 || p.scroll !== 0)) return true;
+  if (p.type === 'ascii' && p.shape === 'diamond') {
+    if (p.breathe > 0) return true;
+  } else if (p.type !== 'none' && (p.breathe > 0 || p.scroll !== 0)) return true;
   if (look.effects.waves.on || look.effects.grain.on) return true;
   return false;
 }

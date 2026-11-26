@@ -448,6 +448,17 @@ const PATTERN_PRESETS: Look[] = [
     l.effects.waves.on = false;
     l.effects.grain = { on: true, amount: 0.06, size: 1.6 };
   }),
+  make('chromatic-ascii', 'Chromatic ASCII', (l) => {
+    l.kind = 'pattern';
+    l.interact = { on: true, mode: 'focus', strength: 0.3, radius: 0.35, follow: 0.4, fadeIdle: true };
+    l.pattern = { ...l.pattern, type: 'ascii', shape: 'diamond', pixel: 12, threshold: 0.48, dither: 0.85, gap: 0.25, shade: 0.75, keep: true, invert: false, ink: '#67833c', mid: '#dda83f', paper: '#faf9f6', subject: true, bgMode: 'paper', thin: 0, breathe: 0.65, scroll: 3 };
+    l.gradient.stops = stops(['#485b35', 0], ['#759845', 0.3], ['#4a9fc5', 0.5], ['#a38aca', 0.7], ['#d990ad', 0.9], ['#eedabe', 1]);
+    l.gradient.type = 'mesh';
+    l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1, haze: 0, vignette: 0 };
+    l.orb.on = false;
+    l.effects.waves.on = false;
+    l.effects.grain.on = false;
+  }),
   make('terminal-ascii', 'Terminal ASCII', (l) => {
     l.interact = { on: true, mode: 'focus', strength: 0.4, radius: 0.5, follow: 0.4, fadeIdle: true };
     // board: ASCII-style pixel scenes in colour on deep navy

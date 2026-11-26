@@ -1,4 +1,12 @@
 {
+  "chromatic-ascii": {
+    "label": "Your original reference",
+    "images": [{
+      "image": "/review/references/chromatic-ascii.png",
+      "title": "Fine green, blue, pink and lavender ASCII characters on light paper",
+      "url": "https://x.com/unvalley_/status/2118928272448970811"
+    }]
+  },
   "outlined-sprite": {
     "label": "Your original reference",
     "images": [{

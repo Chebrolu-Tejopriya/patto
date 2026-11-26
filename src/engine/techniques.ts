@@ -6,6 +6,8 @@
 // All animation is a function of u_phase through sin/cos or integer steps, so
 // frame N of a loop lands exactly on frame 0.
 
+import { CHROMATIC_ASCII } from './chromatic-ascii';
+
 export const HEADER = `#version 300 es
 precision highp float;
 in vec2 vUv;
@@ -165,7 +167,9 @@ vec4 finish(vec3 col, vec2 uv){
   return vec4(mix(bg, col, m), 1.0);
 }
 
+` + CHROMATIC_ASCII + `
 void main(){
+  if(u_shape == 2){ chromaticAscii(); return; }
   float px = max(u_pixel, 6.0);
   vec2 cs = vec2(px * 0.72, px);
   vec2 P = vUv * u_res;
