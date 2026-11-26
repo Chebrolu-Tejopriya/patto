@@ -22,59 +22,6 @@ const TECH_SRC: Partial<Record<PatternType, string>> = {
 };
 
 const MARK_IDS: Record<string, number> = { none: 0, dot: 1, plus: 2, ring: 3, disc: 4, square: 5, xsquare: 6, half: 7, fill: 8, dotscreen: 9, screen: 10, x: 11, grid: 12, stipple: 13 };
-/** Connected regions (4-neighbour) of a boolean grid; keeps the largest and any at least 50% of its
- * size, dilated by one cell. Returns 0/255 per cell. */
-function largestRegions(inside0: boolean[], w: number, h: number): Uint8Array {
-  // opening: erode twice so stems and leaf stalks (a few cells wide) detach, then the
-  // region test, then dilate back so the kept region's edges return to where they were
-  const erode = (src: boolean[]) => {
-    const out: boolean[] = new Array(w * h);
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      let v = src[y * w + x];
-      for (let dy = -1; dy <= 1 && v; dy++) for (let dx = -1; dx <= 1 && v; dx++) {
-        const xx = x + dx, yy = y + dy;
-        if (xx < 0 || yy < 0 || xx >= w || yy >= h || !src[yy * w + xx]) v = false;
-      }
-      out[y * w + x] = v;
-    }
-    return out;
-  };
-  const inside = erode(erode(inside0));
-  const label = new Int32Array(w * h).fill(-1);
-  const sizes: number[] = [];
-  const stack: number[] = [];
-  for (let i = 0; i < w * h; i++) {
-    if (!inside[i] || label[i] >= 0) continue;
-    const id = sizes.length;
-    sizes.push(0);
-    stack.push(i);
-    label[i] = id;
-    while (stack.length) {
-      const j = stack.pop()!;
-      sizes[id]++;
-      const x = j % w, y = (j / w) | 0;
-      const nb = [x > 0 ? j - 1 : -1, x < w - 1 ? j + 1 : -1, y > 0 ? j - w : -1, y < h - 1 ? j + w : -1];
-      for (const k of nb) if (k >= 0 && inside[k] && label[k] < 0) { label[k] = id; stack.push(k); }
-    }
-  }
-  const big = Math.max(0, ...sizes);
-  const keep = sizes.map((s) => s >= big * 0.5);
-  const core = new Uint8Array(w * h);
-  for (let i = 0; i < w * h; i++) core[i] = label[i] >= 0 && keep[label[i]] ? 255 : 0;
-  // dilate by 3 (the two erosions plus one cell of slack); the per-pixel colour test does the fine edge
-  const out = new Uint8Array(w * h);
-  const R = 3;
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    let v = 0;
-    for (let dy = -R; dy <= R && !v; dy++) for (let dx = -R; dx <= R && !v; dx++) {
-      const xx = x + dx, yy = y + dy;
-      if (xx >= 0 && yy >= 0 && xx < w && yy < h && core[yy * w + xx]) v = 255;
-    }
-    out[y * w + x] = v;
-  }
-  return out;
-}
-
 function parseMarks(s: string) {
   const out = new Int32Array(8);
   const parts = s.split(',').map((p) => p.trim().toLowerCase());
@@ -131,9 +78,7 @@ export class Renderer {
   private photoW = 0;
   private photoH = 0;
   private photoFlip = 0;
-  private bg = { r: 1, g: 1, b: 1, tol: 0.15, ok: false, soft: false }; // soft: found by dominant colour, not a flat border
-  private islandTex: WebGLTexture; // coarse mask of the main subject region (soft mode only)
-  private tone = { lo: 0, hi: 1 }; // subject lightness percentiles
+  private bg = { r: 1, g: 1, b: 1, tol: 0.15, ok: false };
   private flipChecked = false;
   private colors = new Float32Array(MAX_STOPS * 3);
   private positions = new Float32Array(MAX_STOPS);
@@ -160,13 +105,6 @@ export class Renderer {
     this.rtA = new RenderTarget(gl, w, h);
     this.rtB = new RenderTarget(gl, w, h);
     this.rtC = new RenderTarget(gl, w, h);
-    this.islandTex = gl.createTexture()!;
-    gl.bindTexture(gl.TEXTURE_2D, this.islandTex);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, 1, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, new Uint8Array([255]));
     this.photoTex = gl.createTexture()!;
     gl.bindTexture(gl.TEXTURE_2D, this.photoTex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -235,86 +173,30 @@ export class Renderer {
       const ctx = c.getContext('2d') as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
       ctx.drawImage(img, 0, 0, n, n);
       const d = ctx.getImageData(0, 0, n, n).data;
-      const all: [number, number, number][] = [];
-      const border: [number, number, number][] = [];
+      const px: [number, number, number][] = [];
       for (let y = 0; y < n; y++) {
         for (let x = 0; x < n; x++) {
+          if (x > 1 && x < n - 2 && y > 1 && y < n - 2) continue;
           const i = (y * n + x) * 4;
-          const p: [number, number, number] = [d[i] / 255, d[i + 1] / 255, d[i + 2] / 255];
-          all.push(p);
-          if (!(x > 1 && x < n - 2 && y > 1 && y < n - 2)) border.push(p);
+          px.push([d[i] / 255, d[i + 1] / 255, d[i + 2] / 255]);
         }
       }
-      const median = (px: [number, number, number][]) =>
-        [0, 1, 2].map((k) => {
-          const v = px.map((p) => p[k]).sort((a, b) => a - b);
-          return v[v.length >> 1];
-        }) as [number, number, number];
-      const spread = (px: [number, number, number][], m: [number, number, number]) => {
-        let sum = 0, near = 0;
-        for (const p of px) {
-          const dist = Math.hypot(p[0] - m[0], p[1] - m[1], p[2] - m[2]);
-          sum += dist;
-          if (dist < 0.15) near++;
-        }
-        return { mean: sum / px.length, near: near / px.length };
+      const med = (k: number) => {
+        const v = px.map((p) => p[k]).sort((a, b) => a - b);
+        return v[v.length >> 1];
       };
-      // 1. flat background: the border is one colour (paper, black, pastel card)
-      const mb = median(border);
-      const sb = spread(border, mb);
-      const lumOf = (p: [number, number, number]) => 0.299 * p[0] + 0.587 * p[1] + 0.114 * p[2];
-      const toneOf = (px: [number, number, number][]) => {
-        const v = px.map(lumOf).sort((a, b) => a - b);
-        if (v.length < 8) return { lo: 0, hi: 1 };
-        return { lo: v[Math.floor(v.length * 0.05)], hi: v[Math.floor(v.length * 0.95)] };
-      };
-      if (sb.near > 0.6) {
-        const tol = Math.min(0.35, Math.max(0.1, 0.1 + 2 * sb.mean));
-        this.bg = { r: mb[0], g: mb[1], b: mb[2], tol, ok: true, soft: false };
-        this.tone = toneOf(all.filter((p) => Math.hypot(p[0] - mb[0], p[1] - mb[1], p[2] - mb[2]) > tol));
-        this.uploadIsland(null, n);
-        return;
+      const r = med(0), g = med(1), b = med(2);
+      let sum = 0, near = 0;
+      for (const p of px) {
+        const dist = Math.hypot(p[0] - r, p[1] - g, p[2] - b);
+        sum += dist;
+        if (dist < 0.15) near++;
       }
-      // 2. busy photo: the dominant colour of the whole frame is the background and whatever
-      // stands out from it is the subject (a magenta flower on green bokeh). Accepted only
-      // when that selects a sensible share of the frame.
-      const ma = median(all);
-      const sa = spread(all, ma);
-      const tol = Math.min(0.45, Math.max(0.12, 0.1 + 1.2 * sa.mean));
-      let cov = 0;
-      for (const p of all) if (Math.hypot(p[0] - ma[0], p[1] - ma[1], p[2] - ma[2]) > tol) cov++;
-      cov /= all.length;
-      this.bg = { r: ma[0], g: ma[1], b: ma[2], tol, ok: cov > 0.05 && cov < 0.6, soft: true };
-      this.tone = toneOf(this.bg.ok ? all.filter((p) => Math.hypot(p[0] - ma[0], p[1] - ma[1], p[2] - ma[2]) > tol) : all);
-      // keep the main subject region only: stray stems and leaves that also differ from the
-      // dominant colour would otherwise be patterned as islands
-      if (this.bg.ok) {
-        // finer grid for the region test so thin stems can be cut away from the subject
-        const m = 96;
-        c.width = m;
-        c.height = m;
-        ctx.drawImage(img, 0, 0, m, m);
-        const dd = ctx.getImageData(0, 0, m, m).data;
-        const inside: boolean[] = new Array(m * m);
-        for (let i = 0; i < m * m; i++) inside[i] = Math.hypot(dd[i * 4] / 255 - ma[0], dd[i * 4 + 1] / 255 - ma[1], dd[i * 4 + 2] / 255 - ma[2]) > tol * 0.9;
-        this.uploadIsland(largestRegions(inside, m, m), m);
-      } else {
-        this.uploadIsland(null, n);
-      }
+      const mean = sum / px.length;
+      this.bg = { r, g, b, tol: Math.min(0.35, Math.max(0.1, 0.1 + 2 * mean)), ok: near / px.length > 0.6 };
     } catch {
-      this.bg = { r: 1, g: 1, b: 1, tol: 0.15, ok: false, soft: false };
-      this.tone = { lo: 0, hi: 1 };
+      this.bg = { r: 1, g: 1, b: 1, tol: 0.15, ok: false };
     }
-  }
-
-  /** Upload the island mask (n x n, row 0 = top of the photo) or a plain white texel. */
-  private uploadIsland(mask: Uint8Array | null, n: number) {
-    const gl = this.gl;
-    gl.bindTexture(gl.TEXTURE_2D, this.islandTex);
-    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-    if (mask) gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, n, n, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, mask);
-    else gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, 1, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, new Uint8Array([255]));
-    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4);
   }
 
   get hasPhoto() {
@@ -429,18 +311,12 @@ export class Renderer {
     this.common(this.stylize, w, h, phase);
     this.stylize.tex('u_grad', 0, src.tex);
     this.stylize.tex('u_photo', 1, this.photoTex);
-    this.stylize.tex('u_island', 2, this.islandTex);
     this.stylize.v2('u_photoSize', Math.max(1, this.photoW), Math.max(1, this.photoH));
     this.stylize.f('u_hasPhoto', this.hasPhoto ? 1 : 0);
     this.stylize.f('u_photoFlip', this.photoFlip);
     this.gl.uniform3f(this.stylize.loc('u_bg'), this.bg.r, this.bg.g, this.bg.b);
     this.stylize.f('u_bgTol', look.pattern.tolerance > 0 ? look.pattern.tolerance : this.bg.tol);
-    // A flat border is strong evidence of a subject: every technique isolates it. The dominant-colour
-    // guess on a busy photo is weaker: only presets that replace the background with paper use it;
-    // print-like processes (engraving, riso, paper cut, halftone...) stay whole-image, which reads better.
-    const subj = look.pattern.subject && this.hasPhoto && (look.pattern.tolerance > 0 || (this.bg.ok && (!this.bg.soft || look.pattern.bgMode === 'paper')));
-    this.stylize.f('u_subject', subj ? 1 : 0);
-    this.stylize.v2('u_tone', this.tone.lo, this.tone.hi);
+    this.stylize.f('u_subject', look.pattern.subject && this.hasPhoto && (this.bg.ok || look.pattern.tolerance > 0) ? 1 : 0);
     this.uploadRamp(this.stylize, n);
     const ph = look.photo;
     this.stylize.i('u_fit', ph.fit === 'contain' ? 1 : 0);
@@ -588,7 +464,6 @@ export class Renderer {
     this.rtA.dispose();
     this.rtB.dispose();
     this.gl.deleteTexture(this.photoTex);
-    this.gl.deleteTexture(this.islandTex);
     if (loseContext) this.gl.getExtension('WEBGL_lose_context')?.loseContext();
   }
 }
