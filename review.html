@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patto · Board review</title>
+    <style>
+      :root { --bg: #0f0f12; --panel: #17171b; --text: #e8e8ec; --muted: #9a9aa6; --accent: #ff6b4a; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text); font: 13px/1.45 system-ui, sans-serif; }
+      header { padding: 20px 24px 8px; }
+      h1 { font-size: 18px; margin: 0 0 6px; }
+      header p { color: var(--muted); margin: 0; max-width: 900px; }
+      .filters { display: flex; gap: 6px; padding: 10px 24px 0; flex-wrap: wrap; }
+      .filters button { border: 1px solid #2a2a30; background: var(--panel); color: var(--muted); padding: 5px 10px; border-radius: 999px; cursor: pointer; font: inherit; }
+      .filters button.on { color: var(--text); border-color: var(--accent); }
+      .rows { padding: 16px 24px 60px; display: grid; gap: 14px; }
+      .row { display: grid; grid-template-columns: 1fr 1fr 300px; gap: 14px; background: var(--panel); border-radius: 10px; padding: 12px; align-items: start; }
+      .row.hidden { display: none; }
+      .fig { position: relative; background: #000; border-radius: 6px; overflow: hidden; display: grid; place-items: center; min-height: 160px; }
+      .fig img, .fig canvas { display: block; max-width: 100%; height: auto; }
+      .fig .tag { position: absolute; left: 8px; top: 8px; font-size: 11px; background: rgba(0,0,0,.65); padding: 2px 7px; border-radius: 999px; color: #fff; }
+      .meta b { display: block; font-size: 14px; margin-bottom: 2px; }
+      .meta .pill { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 999px; margin: 4px 0 8px; }
+      .pill.used { background: #1f4d2e; color: #9be0b0; }
+      .pill.partial { background: #4d3b1f; color: #ffd38a; }
+      .pill.unused { background: #3a2226; color: #ff9aa5; }
+      .meta p { margin: 0 0 8px; color: var(--muted); }
+      .meta a { color: var(--muted); font-size: 11px; }
+      .meta code { color: var(--text); background: #222228; padding: 0 5px; border-radius: 4px; }
+      .meta .k { display: inline-block; min-width: 92px; color: var(--text); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+      .meta .scope { padding: 1px 7px; border-radius: 999px; font-size: 11px; background: #22262e; color: #cfd6e4; }
+      .meta .scope.subject { background: #1f3d4d; color: #9fdcf0; }
+      .meta .scope.background { background: #3d2f1f; color: #f0cf9f; }
+      .meta .reply { border-left: 2px solid var(--accent); padding-left: 8px; color: var(--text); }
+      .row { grid-template-columns: 1fr 1fr 380px; }
+      .fb { margin-top: 10px; border-top: 1px solid #26262c; padding-top: 10px; }
+      .fb textarea { width: 100%; min-height: 70px; resize: vertical; background: #0f0f12; color: var(--text); border: 1px solid #2a2a30; border-radius: 6px; padding: 7px 8px; font: inherit; }
+      .fb textarea:focus { outline: none; border-color: var(--accent); }
+      .fb .actions { display: flex; gap: 6px; align-items: center; margin-top: 6px; }
+      .fb button { border: 1px solid #2a2a30; background: #1e1e24; color: var(--text); padding: 5px 10px; border-radius: 6px; cursor: pointer; font: inherit; font-size: 12px; }
+      .fb button.danger { border-color: #5a2a2a; color: #ff9aa5; }
+      .fb button.danger:hover { background: #3a1e22; }
+      .fb .saved { color: var(--muted); font-size: 11px; margin-left: auto; }
+      .row.eliminated { opacity: .45; }
+      .row.eliminated .fig { filter: grayscale(1); }
+      .row.eliminated .elimTag { display: inline-block; }
+      .elimTag { display: none; font-size: 11px; color: #ff9aa5; margin-left: 6px; }
+      .summary { padding: 0 24px; color: var(--muted); font-size: 12px; }
+      @media (max-width: 900px) { .row { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Patto board review: "patterns new" vs what the engine makes of it</h1>
+      <p>Left: the pin as saved on the board. Right: that same pin pushed through the technique it inspired, rendered live by the app's engine with the named preset. Text in the pins is ignored. Each row describes the mark-making itself: what the pattern is, whether it sits on the subject or the background, its texture, how the subject stays readable, the palette, and what a filter has to do to reproduce it. Status is relative to what is built today.</p>
+    </header>
+    <div class="filters" id="filters"></div>
+    <p class="summary" id="summary"></p>
+    <div class="rows" id="rows"></div>
+    <script type="module" src="/src/review/main.ts"></script>
+  </body>
+</html>
