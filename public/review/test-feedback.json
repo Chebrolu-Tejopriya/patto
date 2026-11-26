@@ -1,1 +1,230 @@
-{}
+{
+  "gapped-mosaic": {
+    "verdict": "good",
+    "at": "2026-11-26T16:08:51.575Z"
+  },
+  "cross-field": {
+    "verdict": "meh",
+    "at": "2026-11-26T16:07:01.559Z"
+  },
+  "conf-screens": {
+    "verdict": "bad",
+    "at": "2026-11-26T16:07:02.858Z"
+  },
+  "stipple-cube": {
+    "verdict": "good",
+    "at": "2026-11-26T16:08:47.184Z"
+  },
+  "two-ink-lines": {
+    "verdict": "good",
+    "at": "2026-11-26T16:08:46.001Z"
+  },
+  "line-room": {
+    "verdict": "good",
+    "at": "2026-11-26T16:08:44.925Z"
+  },
+  "iso-slabs": {
+    "verdict": "bad",
+    "at": "2026-11-26T16:07:08.275Z"
+  },
+  "rain-dashes": {
+    "verdict": "bad",
+    "at": "2026-11-26T16:07:09.755Z"
+  },
+  "sunset-three": {
+    "verdict": "good",
+    "at": "2026-11-26T16:08:56.514Z"
+  },
+  "dot-matrix": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:00.957Z"
+  },
+  "square-rain": {
+    "verdict": "bad",
+    "at": "2026-11-26T16:07:12.183Z"
+  },
+  "led-dissolve": {
+    "verdict": "bad",
+    "at": "2026-11-26T16:07:15.149Z"
+  },
+  "dash-drawing": {
+    "verdict": "bad",
+    "at": "2026-11-26T16:07:17.509Z"
+  },
+  "glass-tiles": {
+    "verdict": "meh",
+    "at": "2026-11-26T16:09:04.874Z"
+  },
+  "pixel-shards": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:08.024Z"
+  },
+  "half-pixel": {
+    "verdict": "bad",
+    "at": "2026-11-26T16:07:25.725Z"
+  },
+  "pixel-cutout": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:11.514Z"
+  },
+  "squircle-blocks": {
+    "verdict": "meh",
+    "at": "2026-11-26T16:07:34.285Z"
+  },
+  "flower-field": {
+    "verdict": "meh",
+    "at": "2026-11-26T16:07:38.393Z"
+  },
+  "type-reveal": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:14.692Z"
+  },
+  "dot-veil": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:16.293Z"
+  },
+  "paper-mosaic": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:20.010Z"
+  },
+  "engraving": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:18.874Z"
+  },
+  "copper-plate": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:17.891Z"
+  },
+  "riso-duotone": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:21.050Z"
+  },
+  "riso-street": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:22.155Z"
+  },
+  "paper-cut": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:23.307Z"
+  },
+  "print-screen": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:31.825Z"
+  },
+  "halftone-press": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:30.225Z"
+  },
+  "led-matrix": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:28.040Z"
+  },
+  "cross-stitch": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:33.485Z"
+  },
+  "sampler-red": {
+    "verdict": "meh",
+    "at": "2026-11-26T16:07:53.620Z"
+  },
+  "terminal-ascii": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:35.313Z"
+  },
+  "typewriter": {
+    "verdict": "meh",
+    "at": "2026-11-26T16:09:44.708Z"
+  },
+  "datamosh": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:39.421Z"
+  },
+  "airbrush-bloom": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:37.475Z"
+  },
+  "voxel-sky": {
+    "verdict": "meh",
+    "at": "2026-11-26T16:08:00.479Z"
+  },
+  "voxel-night": {
+    "verdict": "meh",
+    "at": "2026-11-26T16:09:49.725Z"
+  },
+  "bitmap-night": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:52.462Z"
+  },
+  "bitmap-water": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:54.721Z"
+  },
+  "handheld": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:55.733Z"
+  },
+  "newsprint": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:56.859Z"
+  },
+  "phosphor": {
+    "verdict": "good",
+    "at": "2026-11-26T16:10:00.947Z"
+  },
+  "teal-monolith": {
+    "verdict": "bad",
+    "at": "2026-11-26T16:08:11.433Z"
+  },
+  "dune-dusk": {
+    "verdict": "good",
+    "at": "2026-11-26T16:09:59.162Z"
+  },
+  "arch-pool": {
+    "verdict": "good",
+    "at": "2026-11-26T16:10:02.324Z"
+  },
+  "ember-arches": {
+    "verdict": "meh",
+    "at": "2026-11-26T16:10:04.628Z"
+  },
+  "terracotta": {
+    "verdict": "good",
+    "at": "2026-11-26T16:10:06.291Z"
+  },
+  "lavender-hour": {
+    "verdict": "meh",
+    "at": "2026-11-26T16:10:11.662Z"
+  },
+  "violet-vortex": {
+    "verdict": "meh",
+    "at": "2026-11-26T16:10:09.452Z"
+  },
+  "sodium-columns": {
+    "verdict": "meh",
+    "at": "2026-11-26T16:10:08.397Z"
+  },
+  "neon-pyramid": {
+    "verdict": "meh",
+    "at": "2026-11-26T16:08:25.036Z"
+  },
+  "noir-arcade": {
+    "verdict": "good",
+    "at": "2026-11-26T16:10:15.056Z"
+  },
+  "snow-lilac": {
+    "verdict": "meh",
+    "at": "2026-11-26T16:08:30.560Z"
+  },
+  "glacier": {
+    "verdict": "good",
+    "at": "2026-11-26T16:10:17.049Z"
+  },
+  "acid-ridge": {
+    "verdict": "good",
+    "at": "2026-11-26T16:10:18.408Z"
+  },
+  "magenta-haze": {
+    "verdict": "meh",
+    "at": "2026-11-26T16:10:19.925Z"
+  }
+}

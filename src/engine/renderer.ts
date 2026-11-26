@@ -79,6 +79,7 @@ export class Renderer {
   private photoH = 0;
   private photoFlip = 0;
   private bg = { r: 1, g: 1, b: 1, tol: 0.15, ok: false };
+  private tone = { lo: 0, hi: 1 }; // subject lightness percentiles
   private flipChecked = false;
   private colors = new Float32Array(MAX_STOPS * 3);
   private positions = new Float32Array(MAX_STOPS);
@@ -173,29 +174,59 @@ export class Renderer {
       const ctx = c.getContext('2d') as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
       ctx.drawImage(img, 0, 0, n, n);
       const d = ctx.getImageData(0, 0, n, n).data;
-      const px: [number, number, number][] = [];
+      const all: [number, number, number][] = [];
+      const border: [number, number, number][] = [];
       for (let y = 0; y < n; y++) {
         for (let x = 0; x < n; x++) {
-          if (x > 1 && x < n - 2 && y > 1 && y < n - 2) continue;
           const i = (y * n + x) * 4;
-          px.push([d[i] / 255, d[i + 1] / 255, d[i + 2] / 255]);
+          const p: [number, number, number] = [d[i] / 255, d[i + 1] / 255, d[i + 2] / 255];
+          all.push(p);
+          if (!(x > 1 && x < n - 2 && y > 1 && y < n - 2)) border.push(p);
         }
       }
-      const med = (k: number) => {
-        const v = px.map((p) => p[k]).sort((a, b) => a - b);
-        return v[v.length >> 1];
+      const median = (px: [number, number, number][]) =>
+        [0, 1, 2].map((k) => {
+          const v = px.map((p) => p[k]).sort((a, b) => a - b);
+          return v[v.length >> 1];
+        }) as [number, number, number];
+      const spread = (px: [number, number, number][], m: [number, number, number]) => {
+        let sum = 0, near = 0;
+        for (const p of px) {
+          const dist = Math.hypot(p[0] - m[0], p[1] - m[1], p[2] - m[2]);
+          sum += dist;
+          if (dist < 0.15) near++;
+        }
+        return { mean: sum / px.length, near: near / px.length };
       };
-      const r = med(0), g = med(1), b = med(2);
-      let sum = 0, near = 0;
-      for (const p of px) {
-        const dist = Math.hypot(p[0] - r, p[1] - g, p[2] - b);
-        sum += dist;
-        if (dist < 0.15) near++;
+      // 1. flat background: the border is one colour (paper, black, pastel card)
+      const mb = median(border);
+      const sb = spread(border, mb);
+      const lumOf = (p: [number, number, number]) => 0.299 * p[0] + 0.587 * p[1] + 0.114 * p[2];
+      const toneOf = (px: [number, number, number][]) => {
+        const v = px.map(lumOf).sort((a, b) => a - b);
+        if (v.length < 8) return { lo: 0, hi: 1 };
+        return { lo: v[Math.floor(v.length * 0.05)], hi: v[Math.floor(v.length * 0.95)] };
+      };
+      if (sb.near > 0.6) {
+        const tol = Math.min(0.35, Math.max(0.1, 0.1 + 2 * sb.mean));
+        this.bg = { r: mb[0], g: mb[1], b: mb[2], tol, ok: true };
+        this.tone = toneOf(all.filter((p) => Math.hypot(p[0] - mb[0], p[1] - mb[1], p[2] - mb[2]) > tol));
+        return;
       }
-      const mean = sum / px.length;
-      this.bg = { r, g, b, tol: Math.min(0.35, Math.max(0.1, 0.1 + 2 * mean)), ok: near / px.length > 0.6 };
+      // 2. busy photo: the dominant colour of the whole frame is the background and whatever
+      // stands out from it is the subject (a magenta flower on green bokeh). Accepted only
+      // when that selects a sensible share of the frame.
+      const ma = median(all);
+      const sa = spread(all, ma);
+      const tol = Math.min(0.45, Math.max(0.12, 0.1 + 1.2 * sa.mean));
+      let cov = 0;
+      for (const p of all) if (Math.hypot(p[0] - ma[0], p[1] - ma[1], p[2] - ma[2]) > tol) cov++;
+      cov /= all.length;
+      this.bg = { r: ma[0], g: ma[1], b: ma[2], tol, ok: cov > 0.05 && cov < 0.6 };
+      this.tone = toneOf(this.bg.ok ? all.filter((p) => Math.hypot(p[0] - ma[0], p[1] - ma[1], p[2] - ma[2]) > tol) : all);
     } catch {
       this.bg = { r: 1, g: 1, b: 1, tol: 0.15, ok: false };
+      this.tone = { lo: 0, hi: 1 };
     }
   }
 
@@ -317,6 +348,7 @@ export class Renderer {
     this.gl.uniform3f(this.stylize.loc('u_bg'), this.bg.r, this.bg.g, this.bg.b);
     this.stylize.f('u_bgTol', look.pattern.tolerance > 0 ? look.pattern.tolerance : this.bg.tol);
     this.stylize.f('u_subject', look.pattern.subject && this.hasPhoto && (this.bg.ok || look.pattern.tolerance > 0) ? 1 : 0);
+    this.stylize.v2('u_tone', this.tone.lo, this.tone.hi);
     this.uploadRamp(this.stylize, n);
     const ph = look.photo;
     this.stylize.i('u_fit', ph.fit === 'contain' ? 1 : 0);

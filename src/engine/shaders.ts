@@ -133,6 +133,7 @@ uniform sampler2D u_grad;
 uniform sampler2D u_photo;
 uniform vec2 u_photoSize;
 uniform float u_hasPhoto;
+uniform vec2 u_tone;        // subject lightness range (p5, p95): stretched toward 0..1 so mid-tone subjects use every level
 uniform vec3 u_bg;          // estimated background colour of the photo
 uniform float u_bgTol;      // colour distance that counts as subject
 uniform float u_subject;    // 1 = write a subject mask into alpha
@@ -169,7 +170,7 @@ void main(){
     bool inside = all(greaterThanEqual(puv, vec2(0.0))) && all(lessThanEqual(puv, vec2(1.0)));
     if(inside){
       vec3 photo = texture(u_photo, vec2(puv.x, u_photoFlip > 0.5 ? 1.0 - puv.y : puv.y)).rgb;
-      if(u_subject > 0.5) mask = smoothstep(u_bgTol * 0.6, u_bgTol * 1.4, length(photo - u_bg));
+      if(u_subject > 0.5) mask = smoothstep(u_bgTol * 0.8, u_bgTol * 1.3, length(photo - u_bg));
       float lum = dot(photo, vec3(0.299, 0.587, 0.114));
       lum = (lum - 0.5) * u_contrast + 0.5 + u_exposure;
       if(u_posterize > 0.5){
@@ -183,11 +184,17 @@ void main(){
       float fog = smoothstep(1.0 - u_hazeHeight, 1.0, uv.y);
       float fogAmt = u_haze * (0.25 + 0.75 * fog);
       col = mix(graded, grad, fogAmt);
+      // auto tone: stretch the subject's lightness range so the techniques' tone levels are all used
+      float L0 = dot(col, vec3(0.299, 0.587, 0.114));
+      float Ls = clamp((L0 - u_tone.x) / max(u_tone.y - u_tone.x, 0.05), 0.0, 1.0) * 0.9 + 0.05;
+      col = clamp(col * mix(1.0, Ls / max(L0, 1e-3), 0.45 * mask), 0.0, 1.0);
     }
   }
 
   // orb: a soft disc + glow, coloured from the ramp
-  if(u_orbOn > 0.5){
+  // the orb sits behind the subject of a photo and is skipped when a photo has no subject at all
+  bool orbHere = u_orbOn > 0.5 && (u_hasPhoto < 0.5 || (u_subject > 0.5 && mask < 0.5));
+  if(orbHere){
     vec2 d2 = (uv - u_orbPos) * vec2(aspect, 1.0);
     float d = length(d2);
     float disc = 1.0 - smoothstep(u_orbRadius - u_orbSoft, u_orbRadius + u_orbSoft, d);

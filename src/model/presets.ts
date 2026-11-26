@@ -172,7 +172,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'light', strength: 0.3, radius: 0.5, follow: 0.4, fadeIdle: true };
     // pin 47: straight dashes, one direction per surface, fixed length, single blue, flat ground
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'hatch', shape: 'square', pixel: 13, angle: 80, depth: 8, threshold: 0.5, dither: 1, gap: 0.3, shade: 0, scroll: 0, ink: '#2e55d8', paper: '#e6efd9', keep: false, subject: true, bgMode: 'paper', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'hatch', shape: 'square', pixel: 13, angle: 80, depth: 8, threshold: 0.5, dither: 1, gap: 0.3, shade: 0.6, scroll: 0, ink: '#2e55d8', paper: '#e6efd9', keep: false, subject: true, bgMode: 'paper', thin: 0 };
     l.gradient.stops = stops(['#2e55d8', 0], ['#e6efd9', 1]);
     l.gradient.type = 'linear';
     l.gradient.angle = 60;
