@@ -133,6 +133,7 @@ uniform sampler2D u_grad;
 uniform sampler2D u_photo;
 uniform vec2 u_photoSize;
 uniform float u_hasPhoto;
+uniform sampler2D u_island;  // coarse main-subject region, row 0 = top of the photo
 uniform vec2 u_tone;        // subject lightness range (p5, p95): stretched toward 0..1 so mid-tone subjects use every level
 uniform vec3 u_bg;          // estimated background colour of the photo
 uniform float u_bgTol;      // colour distance that counts as subject
@@ -170,7 +171,10 @@ void main(){
     bool inside = all(greaterThanEqual(puv, vec2(0.0))) && all(lessThanEqual(puv, vec2(1.0)));
     if(inside){
       vec3 photo = texture(u_photo, vec2(puv.x, u_photoFlip > 0.5 ? 1.0 - puv.y : puv.y)).rgb;
-      if(u_subject > 0.5) mask = smoothstep(u_bgTol * 0.8, u_bgTol * 1.3, length(photo - u_bg));
+      if(u_subject > 0.5){
+        mask = smoothstep(u_bgTol * 0.8, u_bgTol * 1.3, length(photo - u_bg));
+        mask *= smoothstep(0.25, 0.6, texture(u_island, vec2(puv.x, 1.0 - puv.y)).r);
+      }
       float lum = dot(photo, vec3(0.299, 0.587, 0.114));
       lum = (lum - 0.5) * u_contrast + 0.5 + u_exposure;
       if(u_posterize > 0.5){
@@ -187,7 +191,7 @@ void main(){
       // auto tone: stretch the subject's lightness range so the techniques' tone levels are all used
       float L0 = dot(col, vec3(0.299, 0.587, 0.114));
       float Ls = clamp((L0 - u_tone.x) / max(u_tone.y - u_tone.x, 0.05), 0.0, 1.0) * 0.9 + 0.05;
-      col = clamp(col * mix(1.0, Ls / max(L0, 1e-3), 0.45 * mask), 0.0, 1.0);
+      col = clamp(col * mix(1.0, Ls / max(L0, 1e-3), 0.45 * mask * u_subject), 0.0, 1.0);
     }
   }
 
