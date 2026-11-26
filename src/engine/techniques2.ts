@@ -61,7 +61,8 @@ void main(){
   float fr = lf - lo;
   ivec2 ic = ivec2(cell);
   float bay = (float(B8[(ic.y & 7) * 8 + (ic.x & 7)]) + 0.5) / 64.0;
-  float lvl = (fr * u_dither > bay * u_dither && u_dither > 0.01) ? lo + 1.0 : lo;
+  // Blend (u_dither): 0 = round to the nearest level, flat regions; 1 = full ordered dither between levels
+  float lvl = (fr > mix(0.5, bay, u_dither)) ? lo + 1.0 : lo;
   lvl = min(lvl, n - 1.0);
   // focus cursor lifts the level so marks fill in softly under the pointer
   if(u_iMode == 3) lvl = min(n - 1.0, lvl + floor(iFall(cuv) * u_iAmt * 2.0));
