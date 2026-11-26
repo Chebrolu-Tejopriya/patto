@@ -305,10 +305,10 @@ export class Renderer {
     if (pointer) this.mouse = { x: pointer.x, y: pointer.y };
 
     // Pass 1: gradient -> dst. After every pass we swap, so src holds the latest image.
+    // Skipped when a covering photo with no haze hides it completely (stylize then never shows u_grad).
     let src = this.rtB;
     let dst = this.rtA;
-    dst.bind();
-    this.common(this.gradient, w, h, phase);
+    // the colour ramp is shared by every pass, so it is prepared even when the gradient pass is skipped
     const g = look.gradient;
     const n = Math.min(g.stops.length, MAX_STOPS);
     const sorted = [...g.stops].sort((a, b) => a.pos - b.pos).slice(0, n);
@@ -319,14 +319,20 @@ export class Renderer {
       this.colors[i * 3 + 2] = b;
       this.positions[i] = sorted[i].pos;
     }
-    this.gradient.i('u_type', g.type === 'linear' ? 0 : g.type === 'radial' ? 1 : 2);
-    this.uploadRamp(this.gradient, n);
-    this.gradient.f('u_angle', (g.angle * Math.PI) / 180);
-    this.gradient.f('u_warp', g.warp);
-    this.gradient.f('u_scale', g.scale);
-    this.gradient.f('u_flow', g.flow);
-    this.gradient.f('u_seed', g.seed);
-    this.draw();
+    const gradientVisible = !this.hasPhoto || look.photo.haze > 0 || look.photo.fit === 'contain';
+    if (gradientVisible) {
+      dst.bind();
+      this.common(this.gradient, w, h, phase);
+      this.gradient.i('u_type', g.type === 'linear' ? 0 : g.type === 'radial' ? 1 : 2);
+      this.uploadRamp(this.gradient, n);
+      this.gradient.f('u_angle', (g.angle * Math.PI) / 180);
+      this.gradient.f('u_warp', g.warp);
+      this.gradient.f('u_scale', g.scale);
+      this.gradient.f('u_flow', g.flow);
+      this.gradient.f('u_seed', g.seed);
+      this.draw();
+    }
+    // swap either way so later passes read the same target as before
     [src, dst] = [dst, src];
 
     // Pass 2: stylize (photo grading, fog, orb, vignette)

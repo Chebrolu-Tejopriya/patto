@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { Quality } from './engine/motion';
 import { cloneLook, defaultLook, normalizeLook, uid, type Look } from './model/look';
 import { BUILT_IN_PRESETS } from './model/presets';
 
@@ -29,6 +30,8 @@ export type State = {
   look: Look;
   playing: boolean;
   photo: Photo | null;
+  quality: Quality; // live stage render scale, not export
+  setQuality: (q: Quality) => void;
   setPhotoFile: (file: File) => Promise<void>;
   clearPhoto: () => void;
   saved: Look[]; // user presets + versions
@@ -52,6 +55,22 @@ export const useStore = create<State>((set, get) => ({
   look: cloneLook(BUILT_IN_PRESETS[0]),
   playing: true,
   photo: null,
+  quality: ((): Quality => {
+    try {
+      const q = localStorage.getItem('patterns.quality');
+      return q === 'high' || q === 'medium' || q === 'low' ? q : 'auto';
+    } catch {
+      return 'auto';
+    }
+  })(),
+  setQuality: (quality) => {
+    try {
+      localStorage.setItem('patterns.quality', quality);
+    } catch {
+      /* ignore */
+    }
+    set({ quality });
+  },
 
   setPhotoFile: async (file) => {
     if (!file.type.startsWith('image/')) throw new Error('Please drop an image file.');

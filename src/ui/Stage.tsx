@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { isAnimated, qualityScale } from '../engine/motion';
 import { Renderer, type Pointer } from '../engine/renderer';
 import { useStore } from '../store';
 
@@ -12,6 +13,14 @@ export function Stage() {
   const playing = useStore((s) => s.playing);
   const photo = useStore((s) => s.photo);
   const setPhotoFile = useStore((s) => s.setPhotoFile);
+  const quality = useStore((s) => s.quality);
+  const setQuality = useStore((s) => s.setQuality);
+  const qualityRef = useRef(quality);
+  qualityRef.current = quality;
+  // anything that must trigger a fresh frame bumps this; the loop renders only when it changed
+  const dirty = useRef(true);
+  const photoRef = useRef(photo);
+  photoRef.current = photo;
   const [dragging, setDragging] = useState(false);
   const [zoom, setZoom] = useState<'fit' | 'fill' | '100'>('fit');
   const zoomRef = useRef<'fit' | 'fill' | '100'>('fit');
@@ -21,6 +30,9 @@ export function Stage() {
   const playingRef = useRef(playing);
   lookRef.current = look;
   playingRef.current = playing;
+  useEffect(() => {
+    dirty.current = true;
+  }, [look, playing, photo, quality]);
 
   // keep the live renderer's photo texture in sync with the store
   useEffect(() => {
@@ -47,8 +59,9 @@ export function Stage() {
         canvas.style.width = w + 'px';
         canvas.style.height = h + 'px';
         const cap = Math.sqrt(2_100_000 / (w * h));
-        const k = Math.min(1, cap);
+        const k = Math.min(1, cap) * qualityScale(qualityRef.current);
         r.resize(w * k, h * k);
+        dirty.current = true;
         return;
       }
       // fit: whole canvas visible with a margin; fill: the canvas covers the stage and is cropped
@@ -60,17 +73,25 @@ export function Stage() {
       const ch = Math.max(1, Math.floor(h * s));
       canvas.style.width = cw + 'px';
       canvas.style.height = ch + 'px';
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       // cap live render at ~2.1MP so the UI stays smooth; export is full-res anyway
       const cap = Math.sqrt((2_100_000) / (cw * ch * dpr * dpr));
-      const k = Math.min(1, cap) * dpr;
+      const k = Math.min(1, cap) * dpr * qualityScale(qualityRef.current);
       r.resize(cw * k, ch * k);
+      dirty.current = true;
     };
     refit.current = fit;
     fit();
     r.render(lookRef.current, 0, 0); // first frame immediately, no black flash
     const ro = new ResizeObserver(fit);
     ro.observe(wrap);
+    // no frames while the stage is scrolled out of view (rAF already stops in hidden tabs)
+    let visible = true;
+    const io = new IntersectionObserver((es) => {
+      visible = es.some((e) => e.isIntersecting);
+      if (visible) dirty.current = true;
+    });
+    io.observe(wrap);
 
     // pointer: target from events, smoothed value sent to the renderer
     const target = { x: 0.5, y: 0.5, inside: false };
@@ -80,8 +101,12 @@ export function Stage() {
       target.x = Math.min(1, Math.max(0, (e.clientX - b.left) / b.width));
       target.y = 1 - Math.min(1, Math.max(0, (e.clientY - b.top) / b.height));
       target.inside = true;
+      dirty.current = true;
     };
-    const onLeave = () => (target.inside = false);
+    const onLeave = () => {
+      target.inside = false;
+      dirty.current = true;
+    };
     canvas.addEventListener('pointermove', onMove);
     canvas.addEventListener('pointerdown', onMove);
     canvas.addEventListener('pointerleave', onLeave);
@@ -92,7 +117,9 @@ export function Stage() {
     let paused = 0; // accumulated pause offset
     let pauseStart = 0;
     let lastSize = `${lookRef.current.size.w}x${lookRef.current.size.h}`;
+    let trailFrames = 0; // frames left for a trail to fade after the pointer goes idle
     const tick = (now: number) => {
+      raf = requestAnimationFrame(tick);
       const l = lookRef.current;
       const sz = `${l.size.w}x${l.size.h}`;
       if (sz !== lastSize) {
@@ -126,8 +153,17 @@ export function Stage() {
       const wantPresence = it.on && (target.inside || !it.fadeIdle) ? 1 : 0;
       ptr.presence += (wantPresence - ptr.presence) * k;
 
+      // Render on demand: only when the look animates on its own, the pointer is still easing,
+      // a trail is fading, or something marked the frame dirty. Static looks cost zero frames.
+      const settling = Math.abs(ptr.x - tx) > 0.0005 || Math.abs(ptr.y - ty) > 0.0005 || Math.abs(ptr.presence - wantPresence) > 0.002;
+      if (it.on && it.mode === 'trail' && ptr.presence > 0.001) trailFrames = 240;
+      else if (trailFrames > 0) trailFrames--;
+      const animated = playingRef.current && isAnimated(l, !!photoRef.current);
+      if (!visible) return;
+      if (!(animated || settling || trailFrames > 0 || dirty.current)) return;
+      dirty.current = false;
       r.render(l, phase, frame, ptr);
-      raf = requestAnimationFrame(tick);
+      if (import.meta.env.DEV) (window as unknown as { __frames: number }).__frames = ((window as unknown as { __frames?: number }).__frames ?? 0) + 1;
     };
     raf = requestAnimationFrame(tick);
     return () => {
@@ -136,6 +172,7 @@ export function Stage() {
       canvas.removeEventListener('pointerdown', onMove);
       canvas.removeEventListener('pointerleave', onLeave);
       ro.disconnect();
+      io.disconnect();
       r.dispose(false);
       rendererRef.current = null;
       t0 = 0;
@@ -155,6 +192,10 @@ export function Stage() {
       el.scrollTop = (el.scrollHeight - el.clientHeight) / 2;
     }
   }, [zoom]);
+
+  useEffect(() => {
+    refit.current();
+  }, [quality]);
 
   return (
     <div
@@ -177,6 +218,12 @@ export function Stage() {
         <button className={zoom === 'fit' ? 'on' : ''} onClick={() => setZoom('fit')} title="Whole canvas visible">Fit</button>
         <button className={zoom === 'fill' ? 'on' : ''} onClick={() => setZoom('fill')} title="Canvas covers the stage, edges cropped">Fill</button>
         <button className={zoom === '100' ? 'on' : ''} onClick={() => setZoom('100')} title="One export pixel per screen pixel">100%</button>
+        <select className="quality" value={quality} onChange={(e) => setQuality(e.target.value as typeof quality)} title="Preview render scale. Export is always full resolution.">
+          <option value="auto">Auto</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
       </div>
       {dragging && <div className="dropHint">Drop image to restyle it</div>}
     </div>

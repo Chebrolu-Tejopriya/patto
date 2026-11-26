@@ -69,6 +69,8 @@ html, body, #root { height: 100%; margin: 0; background: var(--bg); }
 .zoomBar { position: absolute; top: 12px; right: 12px; display: flex; gap: 2px; background: rgba(20,20,24,.9); border: 1px solid #2a2a30; border-radius: 6px; padding: 2px; z-index: 5; }
 .zoomBar button { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 11px; padding: 3px 8px; border-radius: 4px; cursor: pointer; }
 .zoomBar button.on { background: #2a2a30; color: var(--text); }
+.zoomBar select.quality { border: 0; border-left: 1px solid #2a2a30; margin-left: 2px; background: transparent; color: var(--muted); font: inherit; font-size: 11px; padding: 3px 4px; border-radius: 4px; cursor: pointer; outline: none; }
+.zoomBar select.quality option { background: #1a1a1e; color: var(--text); }
 .stage.dragging canvas { outline: 2px dashed var(--accent); outline-offset: 6px; }
 .dropHint { position: absolute; padding: 10px 16px; border-radius: 999px; background: rgba(12,12,14,.85); color: var(--text); border: 1px solid var(--accent); pointer-events: none; }
 .stage { position: relative; }
