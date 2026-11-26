@@ -9,7 +9,6 @@ import { HEADER, MASK, TECH } from './techniques';
 export const CELLS_FRAG = HEADER + TECH + MASK + `
 uniform int u_marks[8];
 uniform int u_ground;
-uniform sampler2D u_trail;
 // 8x8 Bayer: finer density steps between levels than the 4x4 (pins 9, 53)
 const int B8[64] = int[64](
   0,32,8,40,2,34,10,42, 48,16,56,24,50,18,58,26, 12,44,4,36,14,46,6,38, 60,28,52,20,62,30,54,22,
@@ -64,9 +63,8 @@ void main(){
   float bay = (float(B8[(ic.y & 7) * 8 + (ic.x & 7)]) + 0.5) / 64.0;
   float lvl = (fr * u_dither > bay * u_dither && u_dither > 0.01) ? lo + 1.0 : lo;
   lvl = min(lvl, n - 1.0);
-  // trail (hover) lifts the level so marks bloom under the pointer and fade back
-  float tr = texture(u_trail, cuv).r;
-  if(u_iMode == 4) lvl = min(n - 1.0, lvl + floor(tr * 2.5));
+  // focus cursor lifts the level so marks fill in softly under the pointer
+  if(u_iMode == 3) lvl = min(n - 1.0, lvl + floor(iFall(cuv) * u_iAmt * 2.0));
   // random dropout for the dissolving LED boards
   if(u_shade > 0.0 && hash(cell + 3.3) < u_shade * (1.0 - lum)) lvl = 0.0;
   int kind = u_marks[int(lvl)];
@@ -252,9 +250,8 @@ void main(){
 `;
 
 /** Glyph field (pin 39): a five-petal flower glyph where the subject is dark, a dot
- * where it is light. In trail mode the pointer paints flowers that fade back to dots. */
+ * where it is light. The focus cursor blooms dots into flowers under the pointer. */
 export const GLYPH_FRAG = HEADER + TECH + MASK + `
-uniform sampler2D u_trail;
 float flower(vec2 d, float r){
   float m = 1e9;
   for(int i = 0; i < 5; i++){
@@ -273,8 +270,7 @@ void main(){
   float lum = luma(c);
   if(u_invert > 0.5) lum = 1.0 - lum;
   float dark = clamp((1.0 - lum - (u_threshold - 0.5)) * (0.6 + u_dither), 0.0, 1.0);
-  float tr = texture(u_trail, cuv).r;
-  float bloom = u_iMode == 4 ? smoothstep(0.05, 0.6, tr) : 0.0;
+  float bloom = u_iMode == 3 ? smoothstep(0.1, 0.8, iFall(cuv) * u_iAmt) : 0.0;
   float want = max(step(0.45, dark), bloom);
   float r = (0.3 + u_gap * 0.25) * (0.8 + 0.2 * hash(cell));
   float aa = 0.9 / px;
@@ -287,25 +283,11 @@ void main(){
   float hs = hash(cell + 2.2);
   if(u_keep < 0.5) inkc = hs < 0.33 ? u_ink : (hs < 0.66 ? u_mid : mix(u_ink, u_mid, 0.5));
   vec3 col = mix(paper, inkc, cov);
-  // outside the subject the trail still paints flowers on the paper
+  // outside the subject the pointer still blooms flowers on the paper
   float m = subjectMask(vUv);
   vec3 bg = u_bgMode > 0.5 ? paper : texture(u_image, vUv).rgb;
   vec3 outside = mix(bg, inkc, fl * bloom);
   outColor = vec4(mix(outside, col, m), 1.0);
-}
-`;
-
-/** Pointer trail accumulation: prev * decay + a soft splat at the pointer. */
-export const TRAIL_FRAG = HEADER + `
-uniform sampler2D u_prev;
-uniform float u_decay;
-uniform float u_add;
-void main(){
-  float prev = texture(u_prev, vUv).r * u_decay;
-  float aspect = u_res.x / u_res.y;
-  vec2 d = (vUv - u_mouse) * vec2(aspect, 1.0);
-  float splat = exp(-dot(d, d) / (u_iRadius * u_iRadius * 0.08)) * u_add;
-  outColor = vec4(vec3(clamp(prev + splat, 0.0, 1.0)), 1.0);
 }
 `;
 

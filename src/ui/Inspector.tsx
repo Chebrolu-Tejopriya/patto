@@ -47,7 +47,7 @@ const TECH_HINT: Record<PatternType, string> = {
   cells: 'Tone levels each own a mark (dot, plus, ring, disc, square, half, fill) in the image colour; density gradients come from ordered dither between levels.',
   split: 'Half pixel: part of the subject becomes flat pixels along a straight edge. Cut-out: a blocky silhouette, photo inside, paper outside.',
   blocks: 'Rounded blocks of several sizes with a vertical gradient each, outline echoes in the background, no shadows.',
-  glyph: 'A flower glyph where the subject is dark, a dot where it is light. With the trail cursor mode the pointer paints flowers that fade.',
+  glyph: 'A flower glyph where the subject is dark, a dot where it is light.',
   tiles: 'Irregular translucent tiles over the thick parts of the subject only, with a soft shadow copy beneath. Thin features and the background stay as they are.',
   bitmap: '1-bit ordered dither, like early Mac and handheld screens.',
   halftone: 'Dots on a rotated grid grow with tone. Square on dark reads as an LED matrix.',
@@ -229,13 +229,12 @@ export function Inspector() {
       </Section>
 
       <Section title="Cursor" right={<Toggle label="" value={it.on} onChange={(v) => update((l) => (l.interact.on = v))} />}>
-        <Seg<InteractMode> value={it.mode} options={['warp', 'light', 'orb', 'focus', 'trail']} onChange={(v) => update((l) => (l.interact.mode = v))} />
+        <Seg<InteractMode> value={it.mode} options={['warp', 'light', 'orb', 'focus']} onChange={(v) => update((l) => (l.interact.mode = v))} />
         <p className="hint small">
           {it.mode === 'warp' && 'The ombre field drifts toward the pointer with a gentle bend.'}
           {it.mode === 'light' && 'A soft wash of the ramp colour follows the pointer.'}
           {it.mode === 'orb' && 'The orb follows the pointer (turn the orb on).'}
           {it.mode === 'focus' && 'Bitmap cells step finer under the pointer.'}
-          {it.mode === 'trail' && 'The pointer paints marks that slowly fade (glyph field, cell mosaics).'}
         </p>
         <Slider label="Strength" value={it.strength} min={0} max={1} onChange={(v) => update((l) => (l.interact.strength = v))} />
         <Slider label="Radius" value={it.radius} min={0.05} max={1} onChange={(v) => update((l) => (l.interact.radius = v))} />

@@ -19,7 +19,7 @@ const stops = (...pairs: [string, number][]) => pairs.map(([color, pos]) => ({ c
 
 const PATTERN_PRESETS: Look[] = [
   make('gapped-mosaic', 'Gapped Mosaic', (l) => {
-    l.interact = { on: true, mode: 'trail', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
+    l.interact = { on: true, mode: 'warp', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
     // pin 2: three-colour square-cell mosaic with density dither, no glyphs
     l.kind = 'pattern';
     l.pattern = { ...l.pattern, type: 'cells', pixel: 7, depth: 2, threshold: 0.5, dither: 1, gap: 0.55, shade: 0, marks: 'fill,fill,dot', keep: true, paper: '#20223a', ink: '#20223a', mid: '#6b6f45', subject: true, bgMode: 'keep' };
@@ -32,7 +32,7 @@ const PATTERN_PRESETS: Look[] = [
     l.effects.grain.on = false;
   }),
   make('cross-field', 'Cross Field', (l) => {
-    l.interact = { on: true, mode: 'trail', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
+    l.interact = { on: true, mode: 'warp', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
     // pins 59, 64: figure in white grid, black and red fills on a blue ground tiled with small x crosses
     l.kind = 'pattern';
     l.pattern = { ...l.pattern, type: 'cells', pixel: 10, depth: 2, threshold: 0.5, dither: 0.15, gap: 0.9, shade: 0, marks: 'fill,fill,grid', ground: 'x', keep: false, paper: '#2a1fd6', ink: '#0a0a0a', mid: '#e8231a', subject: true, bgMode: 'paper', thin: 0 };
@@ -45,7 +45,7 @@ const PATTERN_PRESETS: Look[] = [
     l.effects.grain.on = false;
   }),
   make('conf-screens', 'Conference Screens', (l) => {
-    l.interact = { on: true, mode: 'trail', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
+    l.interact = { on: true, mode: 'warp', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
     // pins 56, 62: large squares, each filled with one screen density: solid, coarse dots, fine dots, empty
     l.kind = 'pattern';
     l.pattern = { ...l.pattern, type: 'cells', pixel: 40, depth: 3, threshold: 0.5, dither: 0, gap: 0.9, shade: 0, marks: 'fill,screen,dotscreen,none', ground: 'none', keep: false, paper: '#ffffff', ink: '#2b5bd7', mid: '#2b5bd7', subject: true, bgMode: 'paper', thin: 0 };
@@ -58,7 +58,7 @@ const PATTERN_PRESETS: Look[] = [
     l.effects.grain.on = false;
   }),
   make('stipple-cube', 'Stipple', (l) => {
-    l.interact = { on: true, mode: 'trail', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
+    l.interact = { on: true, mode: 'warp', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
     // pin 69: random white stipple on blue, denser where the subject is light, solid at the brightest
     l.kind = 'pattern';
     l.pattern = { ...l.pattern, type: 'cells', pixel: 5, depth: 4, threshold: 0.5, dither: 1, gap: 0.8, shade: 0, marks: 'none,stipple,stipple,disc,fill', ground: 'none', keep: false, invert: true, paper: '#4aa3df', ink: '#ffffff', mid: '#ffffff', subject: true, bgMode: 'paper', thin: 0 };
@@ -133,7 +133,7 @@ const PATTERN_PRESETS: Look[] = [
     l.effects.grain.on = false;
   }),
   make('dot-matrix', 'Dot Matrix', (l) => {
-    l.interact = { on: true, mode: 'trail', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
+    l.interact = { on: true, mode: 'warp', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
     // pins 9, 53, 44: hollow rings for the subject's light tones, plus / disc / square by level, nothing outside
     l.kind = 'pattern';
     l.pattern = { ...l.pattern, type: 'cells', pixel: 12, depth: 3, threshold: 0.5, dither: 0.3, gap: 0.8, shade: 0, marks: 'plus,ring,disc,xsquare', keep: true, paper: '#060607', ink: '#2f6f5a', mid: '#8fd0a8', subject: true, bgMode: 'keep', thin: 0 };
@@ -145,7 +145,7 @@ const PATTERN_PRESETS: Look[] = [
     l.effects.grain.on = false;
   }),
   make('square-rain', 'Square Rain', (l) => {
-    l.interact = { on: true, mode: 'trail', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
+    l.interact = { on: true, mode: 'warp', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
     // pin 28: white squares, half squares and dots by tone on a flat lavender ground, one colour
     l.kind = 'pattern';
     l.pattern = { ...l.pattern, type: 'cells', pixel: 16, depth: 3, threshold: 0.6, dither: 0.6, gap: 1, shade: 0, marks: 'none,dot,half,square', keep: false, paper: '#aeb6d9', ink: '#ffffff', mid: '#ffffff', subject: true, bgMode: 'paper' };
@@ -157,7 +157,7 @@ const PATTERN_PRESETS: Look[] = [
     l.effects.grain.on = false;
   }),
   make('led-dissolve', 'LED Dissolve', (l) => {
-    l.interact = { on: true, mode: 'trail', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
+    l.interact = { on: true, mode: 'warp', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
     // pin 27: square LEDs in two sizes, dropping out at random toward the dark
     l.kind = 'pattern';
     l.pattern = { ...l.pattern, type: 'cells', pixel: 11, depth: 3, threshold: 0.5, dither: 0.4, gap: 0.6, shade: 0.6, marks: 'none,dot,square,square', keep: false, paper: '#4a2100', ink: '#ff7a1a', mid: '#ff9a3c', subject: true, bgMode: 'paper', invert: false };
@@ -243,7 +243,7 @@ const PATTERN_PRESETS: Look[] = [
     l.effects.grain.on = false;
   }),
   make('flower-field', 'Flower Field', (l) => {
-    l.interact = { on: true, mode: 'trail', strength: 0.5, radius: 0.35, follow: 0.4, fadeIdle: true };
+    l.interact = { on: true, mode: 'warp', strength: 0.5, radius: 0.35, follow: 0.4, fadeIdle: true };
     // pin 39: flower glyphs where the subject is dark, dots elsewhere; the pointer paints flowers that fade
     l.kind = 'pattern';
     l.pattern = { ...l.pattern, type: 'glyph', pixel: 22, threshold: 0.5, dither: 0.6, gap: 0.5, keep: false, ink: '#b7422f', mid: '#4a79c9', paper: '#efe9dc', subject: true, bgMode: 'paper', thin: 0 };

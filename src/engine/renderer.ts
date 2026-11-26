@@ -2,7 +2,7 @@ import { Program, RenderTarget, makeQuad } from './gl';
 import { BITMAP_FRAG, VOXEL_FRAG, BLIT_FRAG, GRADIENT_FRAG, GRAIN_FRAG, STYLIZE_FRAG, WAVES_FRAG } from './shaders';
 import { hexToRgb, MAX_STOPS, type Look, type Pattern, type PatternType } from '../model/look';
 import { ASCII_FRAG, GLITCH_FRAG, HALFTONE_FRAG, HATCH_FRAG, MOSAIC_FRAG, PAPERCUT_FRAG, PRINT_FRAG, RISO_FRAG, SOFT_FRAG, TILES_FRAG } from './techniques';
-import { BLOCKS_FRAG, CELLS_FRAG, GLYPH_FRAG, SPLIT_FRAG, STITCH_FRAG, TRAIL_FRAG } from './techniques2';
+import { BLOCKS_FRAG, CELLS_FRAG, GLYPH_FRAG, SPLIT_FRAG, STITCH_FRAG } from './techniques2';
 
 const TECH_SRC: Partial<Record<PatternType, string>> = {
   halftone: HALFTONE_FRAG,
@@ -69,10 +69,6 @@ export class Renderer {
     return (this.techs[type] ??= new Program(this.gl, src));
   }
   private rtC: RenderTarget;
-  private trailA: RenderTarget;
-  private trailB: RenderTarget;
-  private trailProg: Program | null = null;
-  private trailLive = false;
   private waves: Program;
   private grain: Program;
   private blit: Program;
@@ -109,8 +105,6 @@ export class Renderer {
     this.rtA = new RenderTarget(gl, w, h);
     this.rtB = new RenderTarget(gl, w, h);
     this.rtC = new RenderTarget(gl, w, h);
-    this.trailA = new RenderTarget(gl, 320, 180);
-    this.trailB = new RenderTarget(gl, 320, 180);
     this.photoTex = gl.createTexture()!;
     gl.bindTexture(gl.TEXTURE_2D, this.photoTex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -264,25 +258,6 @@ export class Renderer {
     const ml = p.loc('u_marks[0]') ?? p.loc('u_marks');
     if (ml) this.gl.uniform1iv(ml, parseMarks(pt.marks));
     p.i('u_ground', MARK_IDS[(pt.ground ?? 'none').trim().toLowerCase()] ?? 0);
-    p.tex('u_trail', 2, this.trailA.tex);
-  }
-
-  /** Accumulate the pointer trail (used by the trail interaction mode). */
-  private updateTrail(pointer: Pointer | undefined, radius: number) {
-    const gl = this.gl;
-    if (!this.trailProg) this.trailProg = new Program(gl, TRAIL_FRAG);
-    const p = this.trailProg;
-    this.trailB.bind();
-    p.use();
-    p.v2('u_res', 320, 180);
-    p.v2('u_mouse', pointer?.x ?? 0.5, pointer?.y ?? 0.5);
-    p.f('u_iRadius', radius);
-    p.f('u_decay', 0.975);
-    p.f('u_add', pointer ? pointer.presence * 0.35 : 0);
-    p.tex('u_prev', 0, this.trailA.tex);
-    this.draw();
-    [this.trailA, this.trailB] = [this.trailB, this.trailA];
-    this.trailLive = true;
   }
 
   /** phase in [0,1): position within the loop. frame: integer frame index (for grain). */
@@ -296,12 +271,7 @@ export class Renderer {
     const it = look.interact;
     const active = !!pointer && it.on && pointer.presence > 0.001;
     this.iAmt = active ? it.strength * pointer!.presence : 0;
-    this.iMode = it.mode === 'orb' ? 0 : it.mode === 'warp' ? 1 : it.mode === 'light' ? 2 : it.mode === 'focus' ? 3 : 4;
-    if (this.iMode === 4 && pointer && it.on) this.updateTrail(pointer, it.radius);
-    else if (this.trailLive) {
-      this.updateTrail(undefined, it.radius); // let the trail fade out when the mode changes
-      this.trailLive = false;
-    }
+    this.iMode = it.mode === 'orb' ? 0 : it.mode === 'warp' ? 1 : it.mode === 'light' ? 2 : 3;
     this.iRadius = it.radius;
     if (pointer) this.mouse = { x: pointer.x, y: pointer.y };
 

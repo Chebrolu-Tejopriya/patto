@@ -117,7 +117,6 @@ export function Stage() {
     let paused = 0; // accumulated pause offset
     let pauseStart = 0;
     let lastSize = `${lookRef.current.size.w}x${lookRef.current.size.h}`;
-    let trailFrames = 0; // frames left for a trail to fade after the pointer goes idle
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick);
       const l = lookRef.current;
@@ -154,13 +153,11 @@ export function Stage() {
       ptr.presence += (wantPresence - ptr.presence) * k;
 
       // Render on demand: only when the look animates on its own, the pointer is still easing,
-      // a trail is fading, or something marked the frame dirty. Static looks cost zero frames.
+      // or something marked the frame dirty. Static looks cost zero frames.
       const settling = Math.abs(ptr.x - tx) > 0.0005 || Math.abs(ptr.y - ty) > 0.0005 || Math.abs(ptr.presence - wantPresence) > 0.002;
-      if (it.on && it.mode === 'trail' && ptr.presence > 0.001) trailFrames = 240;
-      else if (trailFrames > 0) trailFrames--;
       const animated = playingRef.current && isAnimated(l, !!photoRef.current);
       if (!visible) return;
-      if (!(animated || settling || trailFrames > 0 || dirty.current)) return;
+      if (!(animated || settling || dirty.current)) return;
       dirty.current = false;
       r.render(l, phase, frame, ptr);
       if (import.meta.env.DEV) (window as unknown as { __frames: number }).__frames = ((window as unknown as { __frames?: number }).__frames ?? 0) + 1;

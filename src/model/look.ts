@@ -89,7 +89,7 @@ export type Pattern = {
 export type LookKind = 'pattern' | 'ombre';
 
 /** How the look reacts to the cursor on the live stage. Exports ignore it. */
-export type InteractMode = 'orb' | 'warp' | 'light' | 'focus' | 'trail';
+export type InteractMode = 'orb' | 'warp' | 'light' | 'focus';
 export type Interact = {
   on: boolean;
   mode: InteractMode;
