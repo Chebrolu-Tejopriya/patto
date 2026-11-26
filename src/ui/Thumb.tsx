@@ -9,7 +9,9 @@ let shared: { canvas: HTMLCanvasElement; r: Renderer; photoKey: string | null } 
 function getShared() {
   if (!shared) {
     const canvas = document.createElement('canvas');
-    shared = { canvas, r: new Renderer(canvas, 240, 135), photoKey: null };
+    const r = new Renderer(canvas, 240, 135);
+    r.minScale = 0.45; // marks at 45% of their export size: legible at thumbnail size
+    shared = { canvas, r, photoKey: null };
   }
   return shared;
 }

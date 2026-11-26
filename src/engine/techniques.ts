@@ -308,10 +308,11 @@ void main(){
     float edge = step(0.12, e);
     float dash = step(u_gap * 0.7, hash(floor(P / (px * 1.5)) + 0.4));
     float darkL = clamp((1.0 - lumAt(vUv) - (u_threshold - 0.5)) * (0.6 + u_dither), 0.0, 1.0);
-    float g = max(2.0, px * 0.45);
+    // shadow pips on a whole-pixel grid (a fractional grid aliases into a moire)
+    float g = max(2.0, floor(px * 0.45 + 0.5));
     vec2 gc = floor(P / g);
     vec2 fg = fract(P / g);
-    float pip = step(fg.x, 0.5) * step(fg.y, 0.5) * step(hash(gc + 4.4), (darkL - 0.45) * 1.2);
+    float pip = step(fg.x, 0.5) * step(fg.y, 0.5) * step(hash(gc + 4.4), (darkL - 0.55) * 1.1);
     float ink = max(edge * dash, pip);
     vec3 cC = texture(u_image, vUv).rgb;
     vec3 inkL = u_keep > 0.5 ? cC * 0.6 : u_ink;

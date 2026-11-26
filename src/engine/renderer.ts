@@ -80,6 +80,11 @@ export class Renderer {
   private photoFlip = 0;
   private bg = { r: 1, g: 1, b: 1, tol: 0.15, ok: false };
   private flipChecked = false;
+  /** Lower bound on the size scale (sizes are authored at 1080p). Thumbnails raise it so marks stay legible. */
+  minScale = 0;
+  private scaleFor(h: number) {
+    return Math.max(h / 1080, this.minScale);
+  }
   private colors = new Float32Array(MAX_STOPS * 3);
   private positions = new Float32Array(MAX_STOPS);
   canvas: HTMLCanvasElement | OffscreenCanvas;
@@ -235,7 +240,7 @@ export class Renderer {
 
   /** Upload the shared technique uniforms (see techniques.ts TECH block). */
   private setTech(p: Program, pt: Pattern, h: number) {
-    const s = h / 1080; // sizes are authored at 1080p height
+    const s = this.scaleFor(h); // sizes are authored at 1080p height
     p.f('u_pixel', Math.max(1, pt.pixel * s));
     p.f('u_threshold', pt.threshold);
     p.f('u_dither', pt.dither);
@@ -349,7 +354,7 @@ export class Renderer {
       this.common(this.bitmap, w, h, phase);
       this.bitmap.tex('u_image', 0, src.tex);
       // pixel size is specified at 1080p height so the look is resolution independent
-      this.bitmap.f('u_pixel', Math.max(1, (pt.pixel * h) / 1080));
+      this.bitmap.f('u_pixel', Math.max(1, pt.pixel * this.scaleFor(h)));
       this.bitmap.f('u_threshold', pt.threshold);
       this.bitmap.f('u_dither', pt.dither);
       this.bitmap.i('u_mode', pt.mode === 'bayer4' ? 0 : pt.mode === 'bayer8' ? 1 : pt.mode === 'lines' ? 2 : 3);
@@ -360,7 +365,7 @@ export class Renderer {
       this.bitmap.f('u_midtone', pt.midtone ? 1 : 0);
       this.bitmap.f('u_scroll', pt.scroll);
       this.bitmap.f('u_invert', pt.invert ? 1 : 0);
-      this.bitmap.f('u_thin', (pt.thin * h) / 1080);
+      this.bitmap.f('u_thin', pt.thin * this.scaleFor(h));
       this.bitmap.f('u_bgMode', pt.bgMode === 'paper' ? 1 : 0);
       this.draw();
       [src, dst] = [dst, src];
@@ -368,7 +373,7 @@ export class Renderer {
       dst.bind();
       this.common(this.voxel, w, h, phase);
       this.voxel.tex('u_image', 0, src.tex);
-      this.voxel.f('u_pixel', Math.max(2, (pt.pixel * h) / 1080));
+      this.voxel.f('u_pixel', Math.max(2, pt.pixel * this.scaleFor(h)));
       this.voxel.f('u_threshold', pt.threshold);
       this.voxel.f('u_depth', Math.max(1, Math.round(pt.depth)));
       this.voxel.f('u_tilt', (pt.tilt * Math.PI) / 180);
@@ -383,7 +388,7 @@ export class Renderer {
       this.voxel.f('u_gap', pt.gap);
       const vmid = hexToRgb(pt.mid);
       this.gl.uniform3f(this.voxel.loc('u_mid'), vmid[0], vmid[1], vmid[2]);
-      this.voxel.f('u_thin', (pt.thin * h) / 1080);
+      this.voxel.f('u_thin', pt.thin * this.scaleFor(h));
       this.voxel.f('u_bgMode', pt.bgMode === 'paper' ? 1 : 0);
       this.draw();
       [src, dst] = [dst, src];

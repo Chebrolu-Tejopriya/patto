@@ -22,7 +22,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'warp', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
     // pin 2: three-colour square-cell mosaic with density dither, no glyphs
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'cells', pixel: 7, depth: 2, threshold: 0.5, dither: 1, gap: 0.55, shade: 0, marks: 'fill,fill,dot', keep: true, paper: '#20223a', ink: '#20223a', mid: '#6b6f45', subject: true, bgMode: 'keep' };
+    l.pattern = { ...l.pattern, type: 'cells', pixel: 15, depth: 2, threshold: 0.5, dither: 1, gap: 0.5, shade: 0, marks: 'fill,fill,dot', keep: true, paper: '#20223a', ink: '#20223a', mid: '#6b6f45', subject: true, bgMode: 'keep' };
     l.gradient.stops = stops(['#20223a', 0], ['#6b6f45', 0.5], ['#d7a46f', 1]);
     l.gradient.type = 'linear';
     l.gradient.angle = 90;
@@ -35,7 +35,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'warp', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
     // pins 59, 64: figure in white grid, black and red fills on a blue ground tiled with small x crosses
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'cells', pixel: 10, depth: 2, threshold: 0.5, dither: 0.15, gap: 0.9, shade: 0, marks: 'fill,fill,grid', ground: 'x', keep: false, paper: '#2a1fd6', ink: '#0a0a0a', mid: '#e8231a', subject: true, bgMode: 'paper', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'cells', pixel: 20, depth: 2, threshold: 0.5, dither: 0.15, gap: 0.9, shade: 0, marks: 'fill,fill,grid', ground: 'x', keep: false, paper: '#2a1fd6', ink: '#0a0a0a', mid: '#e8231a', subject: true, bgMode: 'paper', thin: 0 };
     l.gradient.stops = stops(['#2a1fd6', 0], ['#e8231a', 0.6], ['#ffffff', 1]);
     l.gradient.type = 'linear';
     l.gradient.angle = 90;
@@ -48,7 +48,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'warp', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
     // pins 56, 62: large squares, each filled with one screen density: solid, coarse dots, fine dots, empty
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'cells', pixel: 40, depth: 3, threshold: 0.5, dither: 0, gap: 0.9, shade: 0, marks: 'fill,screen,dotscreen,none', ground: 'none', keep: false, paper: '#ffffff', ink: '#2b5bd7', mid: '#2b5bd7', subject: true, bgMode: 'paper', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'cells', pixel: 56, depth: 3, threshold: 0.5, dither: 0, gap: 0.9, shade: 0, marks: 'fill,screen,dotscreen,none', ground: 'none', keep: false, paper: '#ffffff', ink: '#2b5bd7', mid: '#2b5bd7', subject: true, bgMode: 'paper', thin: 0 };
     l.gradient.stops = stops(['#2b5bd7', 0], ['#ffffff', 1]);
     l.gradient.type = 'linear';
     l.gradient.angle = 45;
@@ -61,7 +61,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'warp', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
     // pin 69: random white stipple on blue, denser where the subject is light, solid at the brightest
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'cells', pixel: 5, depth: 4, threshold: 0.5, dither: 1, gap: 0.8, shade: 0, marks: 'none,stipple,stipple,disc,fill', ground: 'none', keep: false, invert: true, paper: '#4aa3df', ink: '#ffffff', mid: '#ffffff', subject: true, bgMode: 'paper', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'cells', pixel: 7, depth: 4, threshold: 0.5, dither: 1, gap: 0.8, shade: 0, marks: 'none,stipple,stipple,disc,fill', ground: 'none', keep: false, invert: true, paper: '#4aa3df', ink: '#ffffff', mid: '#ffffff', subject: true, bgMode: 'paper', thin: 0 };
     l.gradient.stops = stops(['#4aa3df', 0], ['#ffffff', 1]);
     l.gradient.type = 'radial';
     l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1.2, haze: 0, vignette: 0 };
@@ -97,7 +97,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'focus', strength: 0.3, radius: 0.5, follow: 0.4, fadeIdle: true };
     // pins 36, 66, 67: the subject as stacked lilac slabs with dark outlines on every edge, white ground
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'voxel', shape: 'square', pixel: 22, depth: 4, tilt: 30, shade: 0.8, gap: 0.6, breathe: 0, keep: false, ink: '#3b1a6e', mid: '#cdb6ea', paper: '#ffffff', subject: true, bgMode: 'paper', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'voxel', shape: 'square', pixel: 34, depth: 3, tilt: 30, shade: 0.8, gap: 0.6, breathe: 0, keep: false, ink: '#3b1a6e', mid: '#cdb6ea', paper: '#ffffff', subject: true, bgMode: 'paper', thin: 0 };
     l.gradient.stops = stops(['#ffffff', 0], ['#cdb6ea', 0.6], ['#3b1a6e', 1]);
     l.gradient.type = 'linear';
     l.gradient.angle = 90;
@@ -110,7 +110,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'light', strength: 0.3, radius: 0.5, follow: 0.4, fadeIdle: true };
     // pin 61: vertical dashes only, density from tone, green ink on white, whole frame
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'hatch', shape: 'square', pixel: 7, angle: 90, depth: 1, threshold: 0.5, dither: 1, gap: 0.8, shade: 1, scroll: 0, ink: '#1f7a3a', paper: '#ffffff', keep: false, subject: false, bgMode: 'keep', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'hatch', shape: 'square', pixel: 10, angle: 90, depth: 1, threshold: 0.5, dither: 1, gap: 0.8, shade: 1, scroll: 0, ink: '#1f7a3a', paper: '#ffffff', keep: false, subject: false, bgMode: 'keep', thin: 0 };
     l.gradient.stops = stops(['#1f7a3a', 0], ['#ffffff', 1]);
     l.gradient.type = 'linear';
     l.gradient.angle = 90;
@@ -123,7 +123,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'focus', strength: 0.3, radius: 0.5, follow: 0.4, fadeIdle: true };
     // pin 60: navy, olive and orange, dot gradient only where tones change, flats solid
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'bitmap', pixel: 6, threshold: 0.5, dither: 0.4, mode: 'bayer8', midtone: true, ink: '#1c2630', mid: '#6b6a3a', paper: '#f0924a', scroll: 0, invert: false, subject: false, bgMode: 'keep' };
+    l.pattern = { ...l.pattern, type: 'bitmap', pixel: 8, threshold: 0.5, dither: 0.4, mode: 'bayer8', midtone: true, ink: '#1c2630', mid: '#6b6a3a', paper: '#f0924a', scroll: 0, invert: false, subject: false, bgMode: 'keep' };
     l.gradient.stops = stops(['#1c2630', 0], ['#6b6a3a', 0.5], ['#f0924a', 1]);
     l.gradient.type = 'linear';
     l.gradient.angle = 90;
@@ -136,7 +136,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'warp', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
     // pins 9, 53, 44: hollow rings for the subject's light tones, plus / disc / square by level, nothing outside
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'cells', pixel: 12, depth: 3, threshold: 0.5, dither: 0.3, gap: 0.8, shade: 0, marks: 'plus,ring,disc,xsquare', keep: true, paper: '#060607', ink: '#2f6f5a', mid: '#8fd0a8', subject: true, bgMode: 'keep', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'cells', pixel: 28, depth: 3, threshold: 0.5, dither: 0.3, gap: 0.85, shade: 0, marks: 'plus,ring,disc,xsquare', keep: true, paper: '#060607', ink: '#2f6f5a', mid: '#8fd0a8', subject: true, bgMode: 'paper', thin: 0 };
     l.gradient.stops = stops(['#060607', 0], ['#2f6f5a', 0.45], ['#f28ad1', 0.8], ['#fff1c7', 1]);
     l.gradient.type = 'radial';
     l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1.25, haze: 0, vignette: 0 };
@@ -148,7 +148,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'warp', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
     // pin 28: white squares, half squares and dots by tone on a flat lavender ground, one colour
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'cells', pixel: 16, depth: 3, threshold: 0.6, dither: 0.6, gap: 1, shade: 0, marks: 'none,dot,half,square', keep: false, paper: '#aeb6d9', ink: '#ffffff', mid: '#ffffff', subject: true, bgMode: 'paper' };
+    l.pattern = { ...l.pattern, type: 'cells', pixel: 26, depth: 3, threshold: 0.6, dither: 0.6, gap: 1, shade: 0, marks: 'none,dot,half,square', keep: false, paper: '#aeb6d9', ink: '#ffffff', mid: '#ffffff', subject: true, bgMode: 'paper' };
     l.gradient.stops = stops(['#aeb6d9', 0], ['#d8dcef', 0.6], ['#ffffff', 1]);
     l.gradient.type = 'mesh';
     l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1.2, haze: 0, vignette: 0 };
@@ -160,7 +160,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'warp', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
     // pin 27: square LEDs in two sizes, dropping out at random toward the dark
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'cells', pixel: 11, depth: 3, threshold: 0.5, dither: 0.4, gap: 0.6, shade: 0.6, marks: 'none,dot,square,square', keep: false, paper: '#4a2100', ink: '#ff7a1a', mid: '#ff9a3c', subject: true, bgMode: 'paper', invert: false };
+    l.pattern = { ...l.pattern, type: 'cells', pixel: 22, depth: 3, threshold: 0.5, dither: 0.4, gap: 0.6, shade: 0.5, marks: 'none,dot,square,square', keep: false, paper: '#4a2100', ink: '#ff7a1a', mid: '#ff9a3c', subject: true, bgMode: 'paper', invert: false };
     l.gradient.stops = stops(['#4a2100', 0], ['#ff7a1a', 1]);
     l.gradient.type = 'radial';
     l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1.2, haze: 0, vignette: 0 };
@@ -172,7 +172,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'light', strength: 0.3, radius: 0.5, follow: 0.4, fadeIdle: true };
     // pin 47: straight dashes, one direction per surface, fixed length, single blue, flat ground
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'hatch', shape: 'square', pixel: 13, angle: 80, depth: 8, threshold: 0.5, dither: 1, gap: 0.3, shade: 0, scroll: 0, ink: '#2e55d8', paper: '#e6efd9', keep: false, subject: true, bgMode: 'paper', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'hatch', shape: 'square', pixel: 16, angle: 80, depth: 8, threshold: 0.5, dither: 1, gap: 0.3, shade: 0, scroll: 0, ink: '#2e55d8', paper: '#e6efd9', keep: false, subject: true, bgMode: 'paper', thin: 0 };
     l.gradient.stops = stops(['#2e55d8', 0], ['#e6efd9', 1]);
     l.gradient.type = 'linear';
     l.gradient.angle = 60;
@@ -185,7 +185,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'light', strength: 0.3, radius: 0.6, follow: 0.4, fadeIdle: true };
     // pins 3, 4: a blurred subject behind a grid of frosted glass tiles, glow halo, flat peach wash
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'soft', shape: 'square', pixel: 34, depth: 4, shade: 0.9, gap: 0.6, dither: 0.2, breathe: 0.1, paper: '#ffe2cc', subject: true, bgMode: 'paper', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'soft', shape: 'square', pixel: 48, depth: 4, shade: 0.9, gap: 0.6, dither: 0.2, breathe: 0.1, paper: '#ffe2cc', subject: true, bgMode: 'paper', thin: 0 };
     l.gradient.stops = stops(['#ffe2cc', 0], ['#ffb08a', 0.5], ['#fff4ea', 1]);
     l.gradient.type = 'linear';
     l.gradient.angle = 90;
@@ -198,7 +198,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'focus', strength: 0.3, radius: 0.5, follow: 0.4, fadeIdle: true };
     // pins 15, 29, 32, 36: the subject silhouette extruded as layered slabs in perspective, paint inside the faces, flat dark ground
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'voxel', shape: 'square', pixel: 16, depth: 3, tilt: 32, shade: 0.7, breathe: 0.05, keep: true, ink: '#0b0b0b', paper: '#0a0a0a', subject: true, bgMode: 'keep', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'voxel', shape: 'square', pixel: 26, depth: 3, tilt: 32, shade: 0.7, breathe: 0.05, keep: true, ink: '#0b0b0b', paper: '#0a0a0a', subject: true, bgMode: 'paper', thin: 0 };
     l.gradient.stops = stops(['#0a0a0a', 0], ['#2e7d4f', 0.45], ['#d84a7a', 0.8], ['#ffe08a', 1]);
     l.gradient.type = 'mesh';
     l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1.15, haze: 0, vignette: 0 };
@@ -210,7 +210,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'focus', strength: 0.3, radius: 0.5, follow: 0.4, fadeIdle: true };
     // pin 49: the upper-left of the subject turns into flat pixels, the rest stays photographic
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'split', shape: 'dot', pixel: 30, angle: -45, threshold: 0.5, dither: 0.4, breathe: 0.2, paper: '#efede6', subject: true, bgMode: 'keep', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'split', shape: 'dot', pixel: 40, angle: -45, threshold: 0.5, dither: 0.4, breathe: 0.2, paper: '#efede6', subject: true, bgMode: 'keep', thin: 0 };
     l.gradient.stops = stops(['#efede6', 0], ['#f26d7d', 0.5], ['#7fd1c5', 1]);
     l.gradient.type = 'mesh';
     l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1.05, haze: 0, vignette: 0 };
@@ -234,7 +234,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'light', strength: 0.3, radius: 0.5, follow: 0.4, fadeIdle: true };
     // pin 38: rounded blocks with vertical gradients, outline echoes behind, no shadows
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'blocks', pixel: 30, depth: 2, shade: 0.6, dither: 0.3, paper: '#efefef', subject: true, bgMode: 'paper', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'blocks', pixel: 36, depth: 2, shade: 0.6, dither: 0.3, paper: '#efefef', subject: true, bgMode: 'paper', thin: 0 };
     l.gradient.stops = stops(['#efefef', 0], ['#1f8a3a', 0.5], ['#b7e03a', 1]);
     l.gradient.type = 'radial';
     l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1.1, haze: 0, vignette: 0 };
@@ -246,7 +246,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'warp', strength: 0.5, radius: 0.35, follow: 0.4, fadeIdle: true };
     // pin 39: flower glyphs where the subject is dark, dots elsewhere; the pointer paints flowers that fade
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'glyph', pixel: 22, threshold: 0.5, dither: 0.6, gap: 0.5, keep: false, ink: '#b7422f', mid: '#4a79c9', paper: '#efe9dc', subject: true, bgMode: 'paper', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'glyph', pixel: 30, threshold: 0.5, dither: 0.6, gap: 0.5, keep: false, ink: '#b7422f', mid: '#4a79c9', paper: '#efe9dc', subject: true, bgMode: 'paper', thin: 0 };
     l.gradient.stops = stops(['#efe9dc', 0], ['#e0a04a', 0.5], ['#b7422f', 1]);
     l.gradient.type = 'mesh';
     l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1.2, haze: 0, vignette: 0 };
@@ -258,7 +258,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'light', strength: 0.3, radius: 0.5, follow: 0.4, fadeIdle: true };
     // pin 33: the subject mask reveals rows of typeset words in the image colour on canvas
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'ascii', shape: 'square', pixel: 9, threshold: 0.5, dither: 0.6, keep: true, ink: '#4a5aa8', paper: '#efe6d6', subject: true, bgMode: 'paper', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'ascii', shape: 'square', pixel: 13, threshold: 0.5, dither: 0.6, keep: true, ink: '#4a5aa8', paper: '#efe6d6', subject: true, bgMode: 'paper', thin: 0 };
     l.gradient.stops = stops(['#efe6d6', 0], ['#7d8fd6', 0.5], ['#3b4a9a', 1]);
     l.gradient.type = 'radial';
     l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1.15, haze: 0, vignette: 0 };
@@ -270,7 +270,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'focus', strength: 0.3, radius: 0.5, follow: 0.4, fadeIdle: true };
     // pin 42: uniform cyan dots over the subject only, photo kept underneath
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'halftone', shape: 'dot', pixel: 9, angle: 0, threshold: 0.05, dither: 0, gap: 0.62, shade: 1, ink: '#7fe3ff', paper: '#ffffff', keep: false, subject: true, bgMode: 'keep', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'halftone', shape: 'dot', pixel: 12, angle: 0, threshold: 0.05, dither: 0, gap: 0.62, shade: 1, ink: '#7fe3ff', paper: '#ffffff', keep: false, subject: true, bgMode: 'keep', thin: 0 };
     l.gradient.stops = stops(['#2b3a4a', 0], ['#9bb8c9', 1]);
     l.gradient.type = 'linear';
     l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1, haze: 0, vignette: 0 };
@@ -282,7 +282,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'light', strength: 0.3, radius: 0.5, follow: 0.4, fadeIdle: true };
     // board pin 0: flower head as irregular translucent tiles, stem and bee untouched, sepia shadow copy
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'tiles', pixel: 22, gap: 0.55, shade: 0.6, dither: 0.5, depth: 2, tilt: -40, breathe: 0.1, paper: '#f6f1e8', subject: true, tolerance: 0, thin: 14, bgMode: 'keep' };
+    l.pattern = { ...l.pattern, type: 'tiles', pixel: 30, gap: 0.55, shade: 0.6, dither: 0.5, depth: 2, tilt: -40, breathe: 0.1, paper: '#f6f1e8', subject: true, tolerance: 0, thin: 14, bgMode: 'keep' };
     l.gradient.stops = stops(['#f6f1e8', 0], ['#f2a7b6', 0.5], ['#d8467a', 1]);
     l.gradient.type = 'radial';
     l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1.05, haze: 0, vignette: 0 };
@@ -294,7 +294,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'light', strength: 0.4, radius: 0.5, follow: 0.4, fadeIdle: true };
     // board: dashed blue strokes (chair), BIT MAP etching; strokes follow the form
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'hatch', pixel: 10, angle: 35, threshold: 0.5, dither: 0.7, gap: 0.2, shade: 0.4, depth: 7, scroll: 0, ink: '#1b2a6b', paper: '#eef1e4', keep: false, invert: false };
+    l.pattern = { ...l.pattern, type: 'hatch', pixel: 12, angle: 35, threshold: 0.5, dither: 0.7, gap: 0.2, shade: 0.4, depth: 7, scroll: 0, ink: '#1b2a6b', paper: '#eef1e4', keep: false, invert: false };
     l.gradient.stops = stops(['#1b2a6b', 0], ['#8a97c9', 0.5], ['#eef1e4', 1]);
     l.gradient.type = 'linear';
     l.gradient.angle = 70;
@@ -307,7 +307,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'light', strength: 0.4, radius: 0.5, follow: 0.4, fadeIdle: true };
     // fine sepia etching, tight spacing, full contour following
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'hatch', pixel: 7, angle: 20, threshold: 0.48, dither: 0.9, gap: 0.08, shade: 0.25, depth: 8, scroll: 0, ink: '#2a1a12', paper: '#f1e8d8', keep: false, invert: false };
+    l.pattern = { ...l.pattern, type: 'hatch', pixel: 9, angle: 20, threshold: 0.48, dither: 0.9, gap: 0.08, shade: 0.25, depth: 8, scroll: 0, ink: '#2a1a12', paper: '#f1e8d8', keep: false, invert: false };
     l.gradient.stops = stops(['#2a1a12', 0], ['#a08468', 0.5], ['#f1e8d8', 1]);
     l.gradient.type = 'radial';
     l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1.35, haze: 0, vignette: 0.15 };
@@ -332,7 +332,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'warp', strength: 0.3, radius: 0.5, follow: 0.4, fadeIdle: true };
     // board: flat-colour Tokyo street poster; image colours quantised, plates out of register
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'riso', threshold: 0.5, dither: 0.3, gap: 0.35, shade: 1, depth: 3, breathe: 0.15, ink: '#1d2a6e', mid: '#f28c28', paper: '#f2e9d8', keep: true, invert: false };
+    l.pattern = { ...l.pattern, type: 'riso', threshold: 0.5, dither: 0.3, gap: 0.6, shade: 1, depth: 2, breathe: 0.15, ink: '#1d2a6e', mid: '#f28c28', paper: '#f2e9d8', keep: true, invert: false };
     l.gradient.stops = stops(['#1f3a5f', 0], ['#e8734a', 0.5], ['#f2e9d8', 1]);
     l.gradient.type = 'mesh';
     l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1.25, haze: 0, vignette: 0 };
@@ -356,7 +356,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'focus', strength: 0.4, radius: 0.5, follow: 0.4, fadeIdle: true };
     // process-colour screens, like a magnified magazine page
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'print', pixel: 8, angle: 0, threshold: 0.5, dither: 0.3, shade: 0.8, gap: 0.15, breathe: 0.1, ink: '#141414', paper: '#f6f3ea', keep: true, invert: false };
+    l.pattern = { ...l.pattern, type: 'print', pixel: 14, angle: 0, threshold: 0.5, dither: 0.3, shade: 0.8, gap: 0.15, breathe: 0.1, ink: '#141414', paper: '#f6f3ea', keep: true, invert: false };
     l.gradient.stops = stops(['#1b3a8a', 0], ['#e24b8d', 0.5], ['#ffd84a', 1]);
     l.gradient.type = 'mesh';
     l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1.1, haze: 0, vignette: 0 };
@@ -368,7 +368,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'focus', strength: 0.4, radius: 0.5, follow: 0.4, fadeIdle: true };
     // board: blue dot clouds on white, slightly rotated screen
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'halftone', pixel: 14, angle: 15, threshold: 0.5, dither: 0.6, gap: 0.2, shape: 'dot', ink: '#2b5bd7', paper: '#f7f8fb', keep: false, invert: false, breathe: 0.1 };
+    l.pattern = { ...l.pattern, type: 'halftone', pixel: 24, angle: 15, threshold: 0.5, dither: 0.6, gap: 0.2, shape: 'dot', ink: '#2b5bd7', paper: '#f7f8fb', keep: false, invert: false, breathe: 0.1 };
     l.gradient.stops = stops(['#1a3fb0', 0], ['#7fa0f0', 0.5], ['#ffffff', 1]);
     l.gradient.type = 'mesh';
     l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1.15, haze: 0, vignette: 0 };
@@ -380,7 +380,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'focus', strength: 0.4, radius: 0.5, follow: 0.4, fadeIdle: true };
     // board: coloured square dots on black (globe, SILO)
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'halftone', pixel: 13, angle: 0, threshold: 0.45, dither: 0.8, gap: 0.3, shape: 'square', ink: '#ff8a3d', paper: '#070709', keep: true, invert: true, breathe: 0.25 };
+    l.pattern = { ...l.pattern, type: 'halftone', pixel: 20, angle: 0, threshold: 0.45, dither: 0.8, gap: 0.3, shape: 'square', ink: '#ff8a3d', paper: '#070709', keep: true, invert: true, breathe: 0.25, bgMode: 'paper', subject: true };
     l.gradient.stops = stops(['#1b0d00', 0], ['#ff6a00', 0.55], ['#ffd27a', 1]);
     l.gradient.type = 'linear';
     l.gradient.angle = 20;
@@ -393,7 +393,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'light', strength: 0.3, radius: 0.5, follow: 0.4, fadeIdle: true };
     // board: daisy / monstera charts on cream aida, quantised palette
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'stitch', pixel: 16, threshold: 0.82, dither: 0.5, gap: 0.4, shade: 0.8, ink: '#2d3a8c', mid: '#6b7cd9', paper: '#f3eee2', keep: true, invert: false, breathe: 0, subject: true, bgMode: 'paper', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'stitch', pixel: 24, threshold: 0.82, dither: 0.5, gap: 0.4, shade: 0.8, ink: '#2d3a8c', mid: '#6b7cd9', paper: '#f3eee2', keep: true, invert: false, breathe: 0, subject: true, bgMode: 'paper', thin: 0 };
     l.gradient.stops = stops(['#2d3a8c', 0], ['#6b9cd9', 0.5], ['#f3eee2', 1]);
     l.gradient.type = 'radial';
     l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1.2, haze: 0, vignette: 0 };
@@ -405,7 +405,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'light', strength: 0.3, radius: 0.5, follow: 0.4, fadeIdle: true };
     // board: single-colour red sampler on linen
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'stitch', pixel: 14, threshold: 0.6, dither: 0.3, gap: 0.35, shade: 0.7, ink: '#b7332a', mid: '#b7332a', paper: '#efe6d3', keep: false, invert: false, breathe: 0, subject: true, bgMode: 'paper', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'stitch', pixel: 22, threshold: 0.6, dither: 0.3, gap: 0.35, shade: 0.7, ink: '#b7332a', mid: '#b7332a', paper: '#efe6d3', keep: false, invert: false, breathe: 0, subject: true, bgMode: 'paper', thin: 0 };
     l.gradient.stops = stops(['#b7332a', 0], ['#efe6d3', 1]);
     l.gradient.type = 'linear';
     l.gradient.angle = 90;
@@ -418,7 +418,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'focus', strength: 0.4, radius: 0.5, follow: 0.4, fadeIdle: true };
     // board: ASCII-style pixel scenes in colour on deep navy
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'ascii', pixel: 16, threshold: 0.5, dither: 0.7, ink: '#8bd3ff', paper: '#0b1020', keep: true, invert: true, breathe: 0.15 };
+    l.pattern = { ...l.pattern, type: 'ascii', pixel: 20, threshold: 0.5, dither: 0.7, ink: '#8bd3ff', paper: '#0b1020', keep: false, invert: true, breathe: 0.15, bgMode: 'paper', subject: true };
     l.gradient.stops = stops(['#0b1020', 0], ['#2a7fc6', 0.5], ['#d8f3ff', 1]);
     l.gradient.type = 'mesh';
     l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1.4, haze: 0, vignette: 0 };
@@ -430,7 +430,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'focus', strength: 0.4, radius: 0.5, follow: 0.4, fadeIdle: true };
     // black glyphs on warm paper
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'ascii', pixel: 15, threshold: 0.5, dither: 0.6, ink: '#1a1a1a', paper: '#f4f1ea', keep: false, invert: false, breathe: 0 };
+    l.pattern = { ...l.pattern, type: 'ascii', pixel: 18, threshold: 0.5, dither: 0.6, ink: '#1a1a1a', paper: '#f4f1ea', keep: false, invert: false, breathe: 0 };
     l.gradient.stops = stops(['#1a1a1a', 0], ['#f4f1ea', 1]);
     l.gradient.type = 'radial';
     l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1.25, haze: 0, vignette: 0 };
@@ -466,7 +466,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'focus', strength: 0.4, radius: 0.5, follow: 0.4, fadeIdle: true };
     // the reference: white block clouds floating in a flat blue sky, soft left light
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'voxel', pixel: 22, threshold: 0.42, dither: 0, mode: 'bayer4', ink: '#2a7fc6', paper: '#1d8fde', midtone: false, mid: '#8a8f9c', scroll: 0, invert: false, depth: 4, tilt: 35, breathe: 0.25, shade: 0.55 };
+    l.pattern = { ...l.pattern, type: 'voxel', pixel: 30, threshold: 0.42, dither: 0, mode: 'bayer4', ink: '#2a7fc6', paper: '#1d8fde', midtone: false, mid: '#8a8f9c', scroll: 0, invert: false, depth: 4, tilt: 35, breathe: 0.25, shade: 0.55 };
     l.gradient.stops = stops(['#1d8fde', 0], ['#bfe3f7', 0.55], ['#ffffff', 1]);
     l.gradient.type = 'mesh';
     l.gradient.scale = 1.4;
@@ -479,7 +479,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'focus', strength: 0.4, radius: 0.5, follow: 0.4, fadeIdle: true };
     // neon city blocks on ink; taller stacks, steeper tilt
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'voxel', pixel: 14, threshold: 0.3, dither: 0, mode: 'bayer4', ink: '#0b0a1a', paper: '#0b0a1a', midtone: false, mid: '#8a8f9c', scroll: 0, invert: false, depth: 7, tilt: 20, breathe: 0.35, shade: 0.8 };
+    l.pattern = { ...l.pattern, type: 'voxel', pixel: 24, threshold: 0.3, dither: 0, mode: 'bayer4', ink: '#0b0a1a', paper: '#0b0a1a', midtone: false, mid: '#8a8f9c', scroll: 0, invert: false, depth: 7, tilt: 20, breathe: 0.35, shade: 0.8 };
     l.gradient.stops = stops(['#1a1540', 0], ['#ff4fa3', 0.5], ['#ffd166', 1]);
     l.gradient.type = 'linear';
     l.gradient.angle = 90;
@@ -492,7 +492,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'focus', strength: 0.4, radius: 0.5, follow: 0.4, fadeIdle: true };
     // the reference: navy ink on cream, 1-bit Bayer, chunky 6px cells, still
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'bitmap', pixel: 6, threshold: 0.5, dither: 0.9, mode: 'bayer4', ink: '#1e2235', paper: '#e9ecdf', midtone: false, mid: '#8a8f9c', scroll: 0, invert: false };
+    l.pattern = { ...l.pattern, type: 'bitmap', pixel: 8, threshold: 0.5, dither: 0.9, mode: 'bayer4', ink: '#e9ecdf', paper: '#1e2235', midtone: false, mid: '#8a8f9c', scroll: 0, invert: true };
     l.gradient.stops = stops(['#1e2235', 0], ['#5a6078', 0.5], ['#e9ecdf', 1]);
     l.gradient.type = 'linear';
     l.gradient.angle = 90;
@@ -506,7 +506,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'focus', strength: 0.4, radius: 0.5, follow: 0.4, fadeIdle: true };
     // line raster variant, like the water in the reference
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'bitmap', pixel: 5, threshold: 0.48, dither: 1.1, mode: 'lines', ink: '#1e2235', paper: '#e9ecdf', midtone: false, mid: '#8a8f9c', scroll: 4, invert: false };
+    l.pattern = { ...l.pattern, type: 'bitmap', pixel: 6, threshold: 0.48, dither: 1.1, mode: 'lines', ink: '#1e2235', paper: '#e9ecdf', midtone: false, mid: '#8a8f9c', scroll: 4, invert: false };
     l.gradient.stops = stops(['#1e2235', 0], ['#e9ecdf', 1]);
     l.gradient.type = 'linear';
     l.gradient.angle = 90;
@@ -519,7 +519,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'focus', strength: 0.4, radius: 0.5, follow: 0.4, fadeIdle: true };
     // four-shade green LCD
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'bitmap', pixel: 8, threshold: 0.5, dither: 0.7, mode: 'bayer8', ink: '#0f380f', paper: '#9bbc0f', midtone: true, mid: '#306230', scroll: 0, invert: false };
+    l.pattern = { ...l.pattern, type: 'bitmap', pixel: 9, threshold: 0.5, dither: 0.7, mode: 'bayer8', ink: '#0f380f', paper: '#9bbc0f', midtone: true, mid: '#306230', scroll: 0, invert: false };
     l.gradient.stops = stops(['#0f380f', 0], ['#306230', 0.5], ['#9bbc0f', 1]);
     l.gradient.type = 'radial';
     l.photo = { ...l.photo, blend: 0, contrast: 1.2, haze: 0, vignette: 0 };
@@ -531,7 +531,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'focus', strength: 0.4, radius: 0.5, follow: 0.4, fadeIdle: true };
     // fine 8x8 dither, black on warm paper, slow matrix drift
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'bitmap', pixel: 3, threshold: 0.52, dither: 1, mode: 'bayer8', ink: '#141210', paper: '#f1ece0', midtone: false, mid: '#777', scroll: 8, invert: false };
+    l.pattern = { ...l.pattern, type: 'bitmap', pixel: 4, threshold: 0.52, dither: 1, mode: 'bayer8', ink: '#141210', paper: '#f1ece0', midtone: false, mid: '#777', scroll: 8, invert: false };
     l.gradient.stops = stops(['#141210', 0], ['#f1ece0', 1]);
     l.gradient.type = 'mesh';
     l.photo = { ...l.photo, blend: 0, contrast: 1.15, haze: 0, vignette: 0.2 };
@@ -543,7 +543,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'light', strength: 0.4, radius: 0.5, follow: 0.4, fadeIdle: true };
     // amber terminal, noise dither, inverted so bright areas glow
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'bitmap', pixel: 4, threshold: 0.5, dither: 0.8, mode: 'noise', ink: '#1a0e00', paper: '#ffb000', midtone: true, mid: '#8a5a00', scroll: 16, invert: false };
+    l.pattern = { ...l.pattern, type: 'bitmap', pixel: 5, threshold: 0.5, dither: 0.8, mode: 'noise', ink: '#1a0e00', paper: '#ffb000', midtone: true, mid: '#8a5a00', scroll: 16, invert: false };
     l.gradient.stops = stops(['#1a0e00', 0], ['#ffb000', 1]);
     l.gradient.type = 'radial';
     l.photo = { ...l.photo, blend: 0, contrast: 1.3, haze: 0, vignette: 0.4 };
