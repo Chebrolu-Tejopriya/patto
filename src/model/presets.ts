@@ -35,7 +35,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'warp', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
     // pins 59, 64: figure in white grid, black and red fills on a blue ground tiled with small x crosses
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'cells', pixel: 10, depth: 2, threshold: 0.5, dither: 0.15, gap: 0.9, shade: 0, marks: 'fill,fill,grid', ground: 'x', keep: false, paper: '#2a1fd6', ink: '#0a0a0a', mid: '#e8231a', subject: true, bgMode: 'paper', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'cells', pixel: 10, depth: 4, threshold: 0.5, dither: 0.3, gap: 0.9, shade: 0, marks: 'none,fill,fill,fill,grid', ground: 'x', keep: true, paper: '#2a1fd6', ink: '#0a0a0a', mid: '#e8231a', subject: true, bgMode: 'paper', thin: 0 };
     l.gradient.stops = stops(['#2a1fd6', 0], ['#e8231a', 0.6], ['#ffffff', 1]);
     l.gradient.type = 'linear';
     l.gradient.angle = 90;
@@ -48,7 +48,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'warp', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
     // pins 56, 62: large squares, each filled with one screen density: solid, coarse dots, fine dots, empty
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'cells', pixel: 40, depth: 3, threshold: 0.5, dither: 0, gap: 0.9, shade: 0, marks: 'fill,screen,dotscreen,none', ground: 'none', keep: false, paper: '#ffffff', ink: '#2b5bd7', mid: '#2b5bd7', subject: true, bgMode: 'paper', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'cells', pixel: 30, depth: 5, threshold: 0.5, dither: 0.25, gap: 0.9, shade: 0, marks: 'fill,fill,screen,dotscreen,dotscreen,none', ground: 'none', keep: true, paper: '#ffffff', ink: '#2b5bd7', mid: '#2b5bd7', subject: true, bgMode: 'paper', thin: 0 };
     l.gradient.stops = stops(['#2b5bd7', 0], ['#ffffff', 1]);
     l.gradient.type = 'linear';
     l.gradient.angle = 45;
@@ -97,7 +97,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'focus', strength: 0.3, radius: 0.5, follow: 0.4, fadeIdle: true };
     // pins 36, 66, 67: the subject as stacked lilac slabs with dark outlines on every edge, white ground
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'voxel', shape: 'square', pixel: 22, depth: 4, tilt: 30, shade: 0.8, gap: 0.6, breathe: 0, keep: false, ink: '#3b1a6e', mid: '#cdb6ea', paper: '#ffffff', subject: true, bgMode: 'paper', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'voxel', shape: 'square', pixel: 22, depth: 4, tilt: 30, shade: 0.8, gap: 0.35, breathe: 0, keep: true, ink: '#3b1a6e', mid: '#cdb6ea', paper: '#ffffff', subject: true, bgMode: 'paper', thin: 0 };
     l.gradient.stops = stops(['#ffffff', 0], ['#cdb6ea', 0.6], ['#3b1a6e', 1]);
     l.gradient.type = 'linear';
     l.gradient.angle = 90;
