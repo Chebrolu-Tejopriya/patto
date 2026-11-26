@@ -33,11 +33,17 @@
       textarea:focus { outline: none; border-color: var(--accent); }
       .saved { color: var(--muted); font-size: 11px; text-align: right; min-height: 14px; }
       .card.bad { outline: 1px solid #5a2a2a; }
+      .upload { display: block; margin-top: 8px; border: 1px dashed #34343c; border-radius: 8px; padding: 8px; text-align: center; color: var(--muted); cursor: pointer; font-size: 12px; position: relative; }
+      .upload:hover { border-color: var(--accent); color: var(--text); }
+      .upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
     </style>
   </head>
   <body>
     <header>
-      <img id="src" alt="" />
+      <div>
+        <img id="src" alt="" />
+        <label class="upload"><input type="file" id="file" accept="image/*" />Try another image</label>
+      </div>
       <div>
         <h1>Patto image test: one photo, every preset</h1>
         <p>The photo on the left pushed through every built-in preset by the app's engine, exactly as the stage would render it at 1080p. Mark each card as works, so-so, or wrong and add a note. Everything you type is written to <code>public/review/test-feedback.json</code>.</p>

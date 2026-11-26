@@ -61,7 +61,7 @@ const PATTERN_PRESETS: Look[] = [
     l.interact = { on: true, mode: 'warp', strength: 0.4, radius: 0.4, follow: 0.4, fadeIdle: true };
     // pin 69: random white stipple on blue, denser where the subject is light, solid at the brightest
     l.kind = 'pattern';
-    l.pattern = { ...l.pattern, type: 'cells', pixel: 5, depth: 4, threshold: 0.5, dither: 1, gap: 0.8, shade: 0, marks: 'none,stipple,stipple,disc,fill', ground: 'none', keep: false, invert: true, paper: '#4aa3df', ink: '#ffffff', mid: '#ffffff', subject: true, bgMode: 'paper', thin: 0 };
+    l.pattern = { ...l.pattern, type: 'cells', pixel: 5, depth: 4, threshold: 0.5, dither: 1, gap: 0.8, shade: 0, marks: 'none,stipple,stipple,disc,fill', ground: 'none', keep: false, invert: false, paper: '#4aa3df', ink: '#ffffff', mid: '#ffffff', subject: true, bgMode: 'paper', thin: 0 };
     l.gradient.stops = stops(['#4aa3df', 0], ['#ffffff', 1]);
     l.gradient.type = 'radial';
     l.photo = { ...l.photo, blend: 0, posterize: 0, contrast: 1.2, haze: 0, vignette: 0 };

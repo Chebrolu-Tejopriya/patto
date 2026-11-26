@@ -6,7 +6,8 @@ import { BUILT_IN_PRESETS } from '../model/presets';
 
 type Verdict = 'good' | 'meh' | 'bad';
 type Feedback = Record<string, { verdict?: Verdict; text?: string; at?: string }>;
-const IMAGE = '/review/test-image.jpg';
+const IMG_NAME = new URLSearchParams(location.search).get('img') ?? 'test-image';
+const IMAGE = `/review/${/^[a-z0-9-]+$/i.test(IMG_NAME) ? IMG_NAME : 'test-image'}.jpg`;
 const FILE = 'test-feedback';
 
 async function main() {
@@ -53,12 +54,31 @@ async function main() {
 
   const canvas = document.createElement('canvas');
   const r = new Renderer(canvas, 2, 2);
-  const img = await fetch(IMAGE).then((x) => x.blob()).then((b) => createImageBitmap(b));
-  r.setPhoto(img);
+  let img = await fetch(IMAGE).then((x) => x.blob()).then((b) => createImageBitmap(b));
   // the stage would use the image's aspect with the long side at 1920; render at half that
-  const k = 960 / Math.max(img.width, img.height);
-  const w = Math.max(16, Math.round(img.width * k)), h = Math.max(16, Math.round(img.height * k));
-  r.resize(w, h);
+  let w = 16, h = 16;
+  const setImage = (bm: ImageBitmap) => {
+    img = bm;
+    r.setPhoto(img);
+    const k = 960 / Math.max(img.width, img.height);
+    w = Math.max(16, Math.round(img.width * k));
+    h = Math.max(16, Math.round(img.height * k));
+    r.resize(w, h);
+  };
+  setImage(img);
+  const renderers: (() => void)[] = [];
+  const fileEl = document.getElementById('file') as HTMLInputElement;
+  fileEl.addEventListener('change', async () => {
+    const f = fileEl.files?.[0];
+    if (!f) return;
+    const bm = await createImageBitmap(f);
+    (document.getElementById('src') as HTMLImageElement).src = URL.createObjectURL(f);
+    setImage(bm);
+    for (const fn of renderers) {
+      fn();
+      await new Promise((res) => setTimeout(res, 0));
+    }
+  });
 
   const presets = [...BUILT_IN_PRESETS].sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'pattern' ? -1 : 1));
   for (const p of presets) {
@@ -89,19 +109,23 @@ async function main() {
     for (const b of el.querySelectorAll<HTMLButtonElement>('.verdict button')) {
       b.onclick = () => { fb.verdict = fb.verdict === b.dataset.v ? undefined : (b.dataset.v as Verdict); fb.at = new Date().toISOString(); reflect(); applyFilter(); persist(); };
     }
-    // render
+    // render (and re-render when another image is dropped in)
     const out = el.querySelector('canvas')!;
-    out.width = w;
-    out.height = h;
-    try {
-      const look = cloneLook(p);
-      look.size = { w: w * 2, h: h * 2 };
-      look.photo.fit = 'cover';
-      r.render(look, 0.15, 3);
-      out.getContext('2d')!.drawImage(canvas, 0, 0);
-    } catch (e) {
-      console.error('render failed', p.id, e);
-    }
+    const draw = () => {
+      out.width = w;
+      out.height = h;
+      try {
+        const look = cloneLook(p);
+        look.size = { w: w * 2, h: h * 2 };
+        look.photo.fit = 'cover';
+        r.render(look, 0.15, 3);
+        out.getContext('2d')!.drawImage(canvas, 0, 0);
+      } catch (e) {
+        console.error('render failed', p.id, e);
+      }
+    };
+    renderers.push(draw);
+    draw();
     await new Promise((res) => setTimeout(res, 0));
   }
   summary();

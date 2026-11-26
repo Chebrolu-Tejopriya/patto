@@ -22,7 +22,7 @@ const TECH_SRC: Partial<Record<PatternType, string>> = {
 };
 
 const MARK_IDS: Record<string, number> = { none: 0, dot: 1, plus: 2, ring: 3, disc: 4, square: 5, xsquare: 6, half: 7, fill: 8, dotscreen: 9, screen: 10, x: 11, grid: 12, stipple: 13 };
-/** Connected regions (4-neighbour) of a boolean grid; keeps the largest and any at least 30% of its
+/** Connected regions (4-neighbour) of a boolean grid; keeps the largest and any at least 50% of its
  * size, dilated by one cell. Returns 0/255 per cell. */
 function largestRegions(inside0: boolean[], w: number, h: number): Uint8Array {
   // opening: erode twice so stems and leaf stalks (a few cells wide) detach, then the
@@ -58,7 +58,7 @@ function largestRegions(inside0: boolean[], w: number, h: number): Uint8Array {
     }
   }
   const big = Math.max(0, ...sizes);
-  const keep = sizes.map((s) => s >= big * 0.3);
+  const keep = sizes.map((s) => s >= big * 0.5);
   const core = new Uint8Array(w * h);
   for (let i = 0; i < w * h; i++) core[i] = label[i] >= 0 && keep[label[i]] ? 255 : 0;
   // dilate by 3 (the two erosions plus one cell of slack); the per-pixel colour test does the fine edge
